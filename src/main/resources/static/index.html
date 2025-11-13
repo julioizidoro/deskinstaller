@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Outsera API - Documentação</title>
+    <title>DeskInstaller API - Documentação</title>
     <!-- Evita que navegadores requisitem /favicon.ico fornecendo um favicon vazio (data URI) -->
     <link rel="icon" href="data:,">
     <style>
@@ -141,94 +141,168 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Outsera API</h1>
+            <h1>🚀 DeskInstaller API</h1>
             <p>API RESTful seguindo Nível 2 de Maturidade de Richardson</p>
-            <p>Spring Boot + H2 Database + JPA</p>
+            <p>Spring Boot 3.2.0 + MySQL 8.0 + JPA + Lombok</p>
         </div>
 
         <div class="content">
             <div class="section">
                 <h2>🔗 Links Rápidos</h2>
                 <div class="quick-links">
-                
                     <a href="/api" class="btn">📋 Recursos da API (JSON)</a>
-                    <a href="#upload" class="btn">📤 Carregar CSV</a>
-                    <a href="/api/movies" class="btn">🎬 Listar Filmes</a>
-                    <a href="/api/movies/producers/intervals" class="btn">📊 Análise de Produtores</a>
+                    <a href="/api/clientes" class="btn">👥 Listar Clientes</a>
+                    <a href="/api/clientes/count" class="btn">📊 Total de Clientes</a>
+                    <a href="/api/database/status" class="btn">🔍 Status do Banco</a>
                 </div>
             </div>
 
             
 
-            <!-- Seção Filmes -->
+            <!-- Seção Clientes -->
             <div class="section">
-                <h2>🎬 Filmes (Golden Raspberry Awards)</h2>
-                
+                <h2>👥 Clientes (DeskInstaller)</h2>
+
                 <div class="endpoint">
                     <div class="method get">GET</div>
-                    <div class="path">/api/movies</div>
-                    <div class="description">Lista todos os filmes cadastrados</div>
-                </div>
-                
-                <div class="endpoint">
-                    <div class="method get">GET</div>
-                    <div class="path">/api/movies/{id}</div>
-                    <div class="description">Busca filme específico por ID</div>
-                </div>
-                
-                <!-- endpoint /api/movies/search removido: não existe implementação no controlador -->
-                
-                <!-- endpoint /api/movies/period removido: não existe implementação no controlador -->
-                
-                <div class="endpoint">
-                    <div class="method get">GET</div>
-                    <div class="path">/api/movies/producers/intervals</div>
-                    <div class="description">Retorna os produtores com menor e maior intervalo entre dois prêmios consecutivos</div>
+                    <div class="path">/api/clientes</div>
+                    <div class="description">Lista todos os clientes cadastrados</div>
                     <div class="example">
-                        <strong>Formato de resposta:</strong>
-                        <pre>{
-  "min": [{"producer": "Nome", "interval": 1, "previousWin": 1990, "followingWin": 1991}],
-  "max": [{"producer": "Nome", "interval": 13, "previousWin": 2002, "followingWin": 2015}]
-}</pre>
+                        <strong>Exemplo:</strong>
+                        <pre>curl http://localhost:8080/api/clientes</pre>
                     </div>
                 </div>
-                
+
+                <div class="endpoint">
+                    <div class="method get">GET</div>
+                    <div class="path">/api/clientes/{id}</div>
+                    <div class="description">Busca cliente específico por ID</div>
+                    <div class="example">
+                        <strong>Exemplo:</strong>
+                        <pre>curl http://localhost:8080/api/clientes/1</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method get">GET</div>
+                    <div class="path">/api/clientes/buscar/nome?q={nome}</div>
+                    <div class="description">Busca clientes por nome (busca parcial, case insensitive)</div>
+                    <div class="example">
+                        <strong>Exemplo:</strong>
+                        <pre>curl "http://localhost:8080/api/clientes/buscar/nome?q=Silva"</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method get">GET</div>
+                    <div class="path">/api/clientes/buscar/email?email={email}</div>
+                    <div class="description">Busca cliente por email exato</div>
+                    <div class="example">
+                        <strong>Exemplo:</strong>
+                        <pre>curl "http://localhost:8080/api/clientes/buscar/email?email=joao@example.com"</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method get">GET</div>
+                    <div class="path">/api/clientes/buscar/telefone?telefone={telefone}</div>
+                    <div class="description">Busca clientes por telefone (celular ou residencial)</div>
+                    <div class="example">
+                        <strong>Exemplo:</strong>
+                        <pre>curl "http://localhost:8080/api/clientes/buscar/telefone?telefone=11999999999"</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method get">GET</div>
+                    <div class="path">/api/clientes/buscar?nome={nome}&email={email}&telefone={telefone}</div>
+                    <div class="description">Busca com filtros múltiplos (todos os parâmetros são opcionais)</div>
+                    <div class="example">
+                        <strong>Exemplo:</strong>
+                        <pre>curl "http://localhost:8080/api/clientes/buscar?nome=Silva&telefone=11999999999"</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method get">GET</div>
+                    <div class="path">/api/clientes/count</div>
+                    <div class="description">Retorna o total de clientes cadastrados</div>
+                    <div class="example">
+                        <strong>Exemplo de resposta:</strong>
+                        <pre>{ "total": 150 }</pre>
+                    </div>
+                </div>
+
                 <div class="endpoint">
                     <div class="method post">POST</div>
-                    <div class="path">/api/movies/load</div>
-                    <div class="description">Faz upload de um arquivo CSV (multipart/form-data, campo <code>file</code>) e carrega os filmes no banco. Retorna <code>{ "total": &lt;n&gt; }</code> com HTTP 201 quando bem-sucedido.</div>
+                    <div class="path">/api/clientes</div>
+                    <div class="description">Cria um novo cliente (JSON)</div>
                     <div class="example">
-                        <strong>Exemplo (curl):</strong>
-                        <pre>curl -v -X POST -F "file=@/caminho/para/movielist.csv" http://localhost:8080/api/movies/load</pre>
-                        <strong>Nota:</strong> o CSV esperado usa ; (ponto-e-vírgula) como separador e tem um cabeçalho na primeira linha.
+                        <strong>Exemplo:</strong>
+                        <pre>curl -X POST http://localhost:8080/api/clientes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "João Silva",
+    "email": "joao@example.com",
+    "foneCelular": "11999999999"
+  }'</pre>
                     </div>
+                </div>
 
-                    <!-- Formulário simples para testes manuais via navegador -->
-                    <div style="margin-top:12px;">
-                        <form id="upload" action="/api/movies/load" method="post" enctype="multipart/form-data">
-                            <label for="file">Enviar CSV:</label>
-                            <input type="file" id="file" name="file" accept=".csv" />
-                            <button type="submit" class="btn" style="display:inline-block; margin-left:8px;">Enviar</button>
-                        </form>
+                <div class="endpoint">
+                    <div class="method put">PUT</div>
+                    <div class="path">/api/clientes/{id}</div>
+                    <div class="description">Atualiza um cliente existente</div>
+                    <div class="example">
+                        <strong>Exemplo:</strong>
+                        <pre>curl -X PUT http://localhost:8080/api/clientes/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "João Silva Atualizado",
+    "email": "joao.novo@example.com"
+  }'</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="method delete">DELETE</div>
+                    <div class="path">/api/clientes/{id}</div>
+                    <div class="description">Remove um cliente</div>
+                    <div class="example">
+                        <strong>Exemplo:</strong>
+                        <pre>curl -X DELETE http://localhost:8080/api/clientes/1</pre>
                     </div>
                 </div>
             </div>
 
+
             <div class="section">
-                <h2>🛠️ Configuração do Banco H2</h2>
+                <h2>🛠️ Configuração do Banco MySQL</h2>
                 <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number">🗄️</div>
-                        <div>Banco em Memória</div>
+                        <div>MySQL 8.0</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">🔗</div>
-                        <div>jdbc:h2:mem:testdb</div>
+                        <div>localhost:3306/dk_db</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">👤</div>
-                        <div>Usuário: sa (sem senha)</div>
+                        <div>Usuário: julioizidoro</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-number">📊</div>
+                        <div>26+ Tabelas JPA</div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>🔍 Monitoramento do Banco de Dados</h3>
+                    <p><strong>GET</strong> <code>/api/database/status</code> - Status da conexão</p>
+                    <p><strong>GET</strong> <code>/api/database/pool</code> - Informações do pool de conexões HikariCP</p>
+                    <p><strong>GET</strong> <code>/api/database/test</code> - Testa a conexão</p>
+                    <p><strong>GET</strong> <code>/api/database/tables</code> - Lista todas as tabelas</p>
                 </div>
             </div>
         </div>

@@ -1,0 +1,182 @@
+package br.com.deskinstaller.config;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
+import java.util.Properties;
+
+/**
+ * Configuração de Conexão com Banco de Dados MySQL
+ *
+ * Esta classe configura:
+ * - HikariCP (pool de conexões de alta performance)
+ * - EntityManagerFactory (JPA)
+ * - TransactionManager (gerenciamento de transações)
+ *
+ * @author Julio Izidoro
+ * @since 2025-11-13
+ */
+@Configuration
+@EnableTransactionManagement
+@Slf4j
+public class DatabaseConfig {
+
+    @Value("${spring.datasource.url}")
+    private String dbUrl;
+
+    @Value("${spring.datasource.username}")
+    private String dbUsername;
+
+    @Value("${spring.datasource.password}")
+    private String dbPassword;
+
+    @Value("${spring.datasource.driverClassName}")
+    private String driverClassName;
+
+    @Value("${spring.jpa.hibernate.ddl-auto:update}")
+    private String ddlAuto;
+
+    @Value("${spring.jpa.show-sql:false}")
+    private boolean showSql;
+
+    @Value("${spring.jpa.properties.hibernate.format_sql:true}")
+    private boolean formatSql;
+
+    /**
+     * Configura o DataSource com HikariCP (pool de conexões)
+     * HikariCP é conhecido por ser o pool mais rápido e confiável
+     */
+    @Bean
+    @Primary
+    public DataSource dataSource() {
+        log.info("Configurando DataSource com HikariCP para MySQL");
+        log.info("Database URL: {}", maskPassword(dbUrl));
+        log.info("Database User: {}", dbUsername);
+
+        HikariConfig hikariConfig = new HikariConfig();
+
+        // Configurações básicas de conexão
+        hikariConfig.setJdbcUrl(dbUrl);
+        hikariConfig.setUsername(dbUsername);
+        hikariConfig.setPassword(dbPassword);
+        hikariConfig.setDriverClassName(driverClassName);
+
+        // Pool de conexões - configurações otimizadas
+        hikariConfig.setMaximumPoolSize(10); // Máximo de 10 conexões
+        hikariConfig.setMinimumIdle(2);      // Mínimo de 2 conexões idle
+        hikariConfig.setConnectionTimeout(30000); // 30 segundos timeout
+        hikariConfig.setIdleTimeout(600000);      // 10 minutos idle
+        hikariConfig.setMaxLifetime(1800000);     // 30 minutos max lifetime
+
+        // Pool name para identificação nos logs
+        hikariConfig.setPoolName("DeskInstaller-HikariCP");
+
+        // Configurações de validação de conexão
+        hikariConfig.setConnectionTestQuery("SELECT 1");
+        hikariConfig.setValidationTimeout(5000); // 5 segundos
+
+        // Propriedades adicionais do MySQL
+        hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        hikariConfig.addDataSourceProperty("useServerPrepStmts", "true");
+        hikariConfig.addDataSourceProperty("useLocalSessionState", "true");
+        hikariConfig.addDataSourceProperty("rewriteBatchedStatements", "true");
+        hikariConfig.addDataSourceProperty("cacheResultSetMetadata", "true");
+        hikariConfig.addDataSourceProperty("cacheServerConfiguration", "true");
+        hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
+        hikariConfig.addDataSourceProperty("maintainTimeStats", "false");
+
+        HikariDataSource dataSource = new HikariDataSource(hikariConfig);
+
+        log.info("✅ HikariCP DataSource configurado com sucesso!");
+        log.info("   - Pool Size: {} conexões", hikariConfig.getMaximumPoolSize());
+        log.info("   - Minimum Idle: {} conexões", hikariConfig.getMinimumIdle());
+
+        return dataSource;
+    }
+
+    /**
+     * Configura o EntityManagerFactory para JPA/Hibernate
+     */
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+        log.info("Configurando EntityManagerFactory para JPA/Hibernate");
+
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource);
+
+        // Pacotes onde estão as entidades JPA
+        em.setPackagesToScan(
+            "com.avaliacao.model",
+            "br.com.deskinstaller.model"
+        );
+
+        // Adapter do Hibernate
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        vendorAdapter.setGenerateDdl(true);
+        vendorAdapter.setShowSql(showSql);
+        em.setJpaVendorAdapter(vendorAdapter);
+
+        // Propriedades do Hibernate
+        Properties jpaProperties = new Properties();
+        jpaProperties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+        jpaProperties.put("hibernate.hbm2ddl.auto", ddlAuto);
+        jpaProperties.put("hibernate.show_sql", showSql);
+        jpaProperties.put("hibernate.format_sql", formatSql);
+        jpaProperties.put("hibernate.use_sql_comments", true);
+        jpaProperties.put("hibernate.jdbc.batch_size", 20);
+        jpaProperties.put("hibernate.order_inserts", true);
+        jpaProperties.put("hibernate.order_updates", true);
+        jpaProperties.put("hibernate.jdbc.time_zone", "America/Sao_Paulo");
+
+        // Configurações de performance
+        jpaProperties.put("hibernate.generate_statistics", false);
+        jpaProperties.put("hibernate.cache.use_second_level_cache", false);
+        jpaProperties.put("hibernate.cache.use_query_cache", false);
+
+        em.setJpaProperties(jpaProperties);
+
+        log.info("✅ EntityManagerFactory configurado!");
+        log.info("   - DDL Auto: {}", ddlAuto);
+        log.info("   - Show SQL: {}", showSql);
+        log.info("   - Pacotes escaneados: com.avaliacao.model, br.com.deskinstaller.model");
+
+        return em;
+    }
+
+    /**
+     * Configura o gerenciador de transações JPA
+     */
+    @Bean
+    public PlatformTransactionManager transactionManager(LocalContainerEntityManagerFactoryBean entityManagerFactory) {
+        log.info("Configurando Transaction Manager");
+
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
+
+        log.info("✅ Transaction Manager configurado!");
+
+        return transactionManager;
+    }
+
+    /**
+     * Mascara a senha na URL do banco para logs
+     */
+    private String maskPassword(String url) {
+        if (url == null) return null;
+        return url.replaceAll("password=[^&;]*", "password=****");
+    }
+}
+
