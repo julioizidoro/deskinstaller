@@ -110,3 +110,7 @@ application-dev.properties
 .jacoco/
 *.exec
 
+/target/
+node_modules
+dist
+.env

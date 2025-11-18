@@ -71,7 +71,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 | `Contaspagar` | contaspagar | Contas a pagar |
 | `Controlecheques` | controlecheques | Controle de cheques |
 | `Empresa` | empresa | Dados da empresa |
-| `Endereco` | endereco | Endereços |
+| `Funcionario` | Funcionario | Endereços |
 | `Formacontaspagar` | formacontaspagar | Formas de pagamento |
 | `Funcao` | funcao | Funções |
 | `Funcionario` | funcionario | Funcionários |

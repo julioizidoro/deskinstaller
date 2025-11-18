@@ -21,11 +21,14 @@ public class ClienteDTO {
 
     private Integer idcliente;
     private String nome;
+    private String tipoPessoa;
     private Date dataNascimento;
     private String foneResidencial;
     private String foneCelular;
     private String foneComercial;
     private String email;
     private String contato;
+    private String cpfcnpj;
+    private String rgie;
 }
 

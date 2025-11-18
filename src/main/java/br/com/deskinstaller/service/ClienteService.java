@@ -122,12 +122,6 @@ public class ClienteService {
     public ClienteDTO salvar(ClienteDTO clienteDTO) {
         log.info("Salvando cliente: {}", clienteDTO.getNome());
 
-        // Verifica se já existe email cadastrado (para novos clientes)
-        if (clienteDTO.getIdcliente() == null && clienteDTO.getEmail() != null) {
-            if (clienteRepository.existsByEmail(clienteDTO.getEmail())) {
-                throw new RuntimeException("Já existe um cliente cadastrado com o email: " + clienteDTO.getEmail());
-            }
-        }
 
         Cliente cliente = converterParaEntidade(clienteDTO);
         Cliente clienteSalvo = clienteRepository.save(cliente);
@@ -176,12 +170,15 @@ public class ClienteService {
         return ClienteDTO.builder()
                 .idcliente(cliente.getIdcliente())
                 .nome(cliente.getNome())
+                .tipoPessoa(cliente.getTipoPessoa())
                 .dataNascimento(cliente.getDataNascimento())
                 .foneResidencial(cliente.getFoneResidencial())
                 .foneCelular(cliente.getFoneCelular())
                 .foneComercial(cliente.getFoneComercial())
                 .email(cliente.getEmail())
                 .contato(cliente.getContato())
+                .cpfcnpj(cliente.getCpfcnpj())
+                .rgie(cliente.getRgie())
                 .build();
     }
 
@@ -192,12 +189,15 @@ public class ClienteService {
         Cliente cliente = new Cliente();
         cliente.setIdcliente(dto.getIdcliente());
         cliente.setNome(dto.getNome());
+        cliente.setTipoPessoa(dto.getTipoPessoa());
         cliente.setDataNascimento(dto.getDataNascimento());
         cliente.setFoneResidencial(dto.getFoneResidencial());
         cliente.setFoneCelular(dto.getFoneCelular());
         cliente.setFoneComercial(dto.getFoneComercial());
         cliente.setEmail(dto.getEmail());
         cliente.setContato(dto.getContato());
+        cliente.setCpfcnpj(dto.getCpfcnpj());
+        cliente.setRgie(dto.getRgie());
         return cliente;
     }
 }

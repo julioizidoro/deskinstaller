@@ -54,8 +54,8 @@ public class Orcamento implements Serializable {
     @Lob
     @Column(name = "observacao")
     private String observacao;
-    @Column(name = "endereco_idendereco")
-    private int endereco;
+    @Column(name = "Funcionario_idFuncionario")
+    private int Funcionario;
     @Column(name = "cliente_idcliente")
     private int cliente;
     @Column(name = "situacao")

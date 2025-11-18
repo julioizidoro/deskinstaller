@@ -31,6 +31,10 @@ public class Cliente implements Serializable {
     private String nome;
 
     @Basic(optional = false)
+    @Column(name = "tipoPessoa")
+    private String tipoPessoa;
+
+    @Basic(optional = false)
     @Column(name = "dataNascimento")
     @Temporal(TemporalType.DATE)
     private Date dataNascimento;
@@ -49,5 +53,11 @@ public class Cliente implements Serializable {
 
     @Column(name = "contato")
     private String contato;
+
+    @Column(name = "cpfcnpj")
+    private String cpfcnpj;
+
+    @Column(name = "rgie")
+    private String rgie;
 }
 

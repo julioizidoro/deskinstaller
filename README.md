@@ -131,7 +131,7 @@ http://localhost:8080/v3/api-docs
 ### Principais Entidades
 
 - **Cliente** - Cadastro de clientes
-- **Endereco** - Endereços dos clientes
+- **Funcionario** - Endereços dos clientes
 - **Funcionario** - Funcionários da empresa
 - **Ordemservico** - Ordens de serviço
 - **Orcamento** - Orçamentos
@@ -267,4 +267,13 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 **Desenvolvido com ❤️ usando Spring Boot 3 + MySQL + Lombok**
 
 **Data:** 13 de Novembro de 2025
+
+# deskInstaller-api
+
+Rápido esqueleto em TypeScript + Express.
+
+Comandos:
+- npm install
+- npm run dev   # desenvolvimento
+- npm run build && npm start  # produção
 

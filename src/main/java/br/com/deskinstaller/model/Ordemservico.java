@@ -6,20 +6,14 @@ package br.com.deskinstaller.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+
+import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 
 /**
  *
@@ -55,12 +49,17 @@ public class Ordemservico implements Serializable {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "valorComissao")
     private Double valorComissao;
-    @Column(name = "endereco_idendereco")
-    private int endereco;
-    @Column(name = "cliente_idcliente")
-    private int cliente;
-    @Column(name = "funcionario_idfuncionario")
-    private int funcionario;
+    @ManyToOne(optional = false) // ou true se o Funcionario puder ser nulo
+    @JoinColumn(name = "Funcionario_idFuncionario", referencedColumnName = "idFuncionario")
+    private Funcionario Funcionario;
+
+    @ManyToOne(optional = false) // ou true se o cliente puder ser nulo
+    @JoinColumn(name = "cliente_idcliente", referencedColumnName = "idcliente")
+    private Cliente cliente;
+
+    @ManyToOne(optional = false) // ou true se o cliente puder ser nulo
+    @JoinColumn(name = "funcionario_idfuncionario", referencedColumnName = "idfuncionario")
+    private Funcionario funcionario;
     @Column(name = "indicacao")
     private String indicacao;
 

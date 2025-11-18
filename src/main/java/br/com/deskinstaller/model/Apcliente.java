@@ -55,8 +55,8 @@ public class Apcliente implements Serializable {
     private String local;
     @Column(name = "cliente_idcliente")
     private int cliente;
-    @Column(name = "endereco_idendereco")
-    private int endereco;
+    @Column(name = "Funcionario_idFuncionario")
+    private int Funcionario;
     @Column(name = "modelo")
     private String modelo;
     @Column(name = "fabricante")

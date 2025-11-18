@@ -35,14 +35,14 @@ public class Funcionario implements Serializable {
     private Integer idfuncionario;
     @Column(name = "nome")
     private String nome;
-    @Column(name = "foneResidencial")
-    private String foneResidencial;
     @Column(name = "foneCelular")
     private String foneCelular;
-    @Column(name = "funcao_idfuncao")
-    private int funcao;
     @Column(name = "valorComissao")
     private Float valorComissao;
+    @Column(name = "funcao")
+    private String funcao;
+    @Column(name = "ativo")
+    private boolean ativo;
 
 
 }

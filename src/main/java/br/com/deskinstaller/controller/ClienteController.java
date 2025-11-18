@@ -119,11 +119,10 @@ public class ClienteController {
      * Cria novo cliente
      * POST /api/clientes
      */
-    @PostMapping
+    @PostMapping("/salvar")
     public ResponseEntity<?> criar(@RequestBody ClienteDTO clienteDTO) {
         log.info("POST /api/clientes - Criar novo cliente: {}", clienteDTO.getNome());
         try {
-            clienteDTO.setIdcliente(null); // Garante que é novo
             ClienteDTO clienteSalvo = clienteService.salvar(clienteDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
         } catch (RuntimeException e) {

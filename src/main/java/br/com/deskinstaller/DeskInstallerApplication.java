@@ -16,4 +16,3 @@ public class DeskInstallerApplication {
         SpringApplication.run(DeskInstallerApplication.class, args);
     }
 }
-

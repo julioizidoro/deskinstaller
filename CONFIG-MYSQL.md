@@ -86,7 +86,7 @@ spring.jpa.hibernate.ddl-auto=update
 - ✅ **controlecheques** - Controle de cheques
 - ✅ **contaspagar** - Contas a pagar
 - ✅ **empresa** - Dados da empresa
-- ✅ **endereco** - Endereços
+- ✅ **Funcionario** - Endereços
 - ✅ **formacontaspagar** - Formas de pagamento
 - ✅ **funcao** - Funções
 - ✅ **funcionario** - Funcionários
