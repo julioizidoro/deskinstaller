@@ -30,21 +30,19 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "apcliente")
 public class Apcliente implements Serializable {
-    @Column(name = "dataCompra")
-    @Temporal(TemporalType.DATE)
-    private Date dataCompra;
-    @Column(name = "notaFiscal")
-    private String notaFiscal;
-    @Column(name = "vendedor_idvendedor")
-    private int vendedor;
-    @Column(name = "loja_idloja")
-    private int loja;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "idapCliente")
     private Integer idapCliente;
+    @Column(name = "dataCompra")
+    @Temporal(TemporalType.DATE)
+    private Date dataCompra;
+    @Column(name = "notaFiscal")
+    private String notaFiscal;
+    @Column(name = "loja")
+    private String loja;
     @Column(name = "dataInstalacao")
     @Temporal(TemporalType.DATE)
     private Date dataInstalacao;
@@ -55,8 +53,6 @@ public class Apcliente implements Serializable {
     private String local;
     @Column(name = "cliente_idcliente")
     private int cliente;
-    @Column(name = "Funcionario_idFuncionario")
-    private int Funcionario;
     @Column(name = "modelo")
     private String modelo;
     @Column(name = "fabricante")

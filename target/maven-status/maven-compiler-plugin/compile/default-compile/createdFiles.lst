@@ -12,6 +12,8 @@ br/com/deskinstaller/config/CorsConfig.class
 br/com/deskinstaller/model/Controlecheques.class
 br/com/deskinstaller/dto/OrdemservicoDTO.class
 br/com/deskinstaller/service/EnderecoService.class
+br/com/deskinstaller/dto/ApclienteDTO.class
+br/com/deskinstaller/dto/ApclienteDTO$ApclienteDTOBuilder.class
 br/com/deskinstaller/dto/EnderecoDTO$EnderecoDTOBuilder.class
 br/com/deskinstaller/model/Servico.class
 br/com/deskinstaller/model/Apcliente.class
@@ -22,12 +24,14 @@ br/com/deskinstaller/DeskInstallerApplication.class
 br/com/deskinstaller/model/Loja.class
 br/com/deskinstaller/model/Relservico.class
 br/com/deskinstaller/model/Planoconta.class
+br/com/deskinstaller/service/ApClienteService.class
 br/com/deskinstaller/controller/FuncionarioController.class
 br/com/deskinstaller/model/Formacontaspagar.class
 br/com/deskinstaller/model/Parametros.class
 br/com/deskinstaller/model/OsFuncionario.class
 br/com/deskinstaller/repository/EnderecoRepository.class
 br/com/deskinstaller/model/Ordemservico.class
+br/com/deskinstaller/controller/ApClienteController.class
 br/com/deskinstaller/model/Contaspagar.class
 br/com/deskinstaller/model/Funcao.class
 br/com/deskinstaller/model/Funcionario.class
@@ -42,6 +46,7 @@ br/com/deskinstaller/model/Obstecnico.class
 br/com/deskinstaller/model/Endereco.class
 br/com/deskinstaller/controller/EnderecoController.class
 br/com/deskinstaller/dto/OrdemservicoDTO$OrdemservicoDTOBuilder.class
+br/com/deskinstaller/repository/ApClienteRepository.class
 br/com/deskinstaller/model/Empresa.class
 br/com/deskinstaller/model/Banco.class
 br/com/deskinstaller/model/Vendedor.class

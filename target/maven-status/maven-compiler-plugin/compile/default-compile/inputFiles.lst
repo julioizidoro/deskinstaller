@@ -1,6 +1,7 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Contaspagar.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Vendedor.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Movimentocaixa.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/ApClienteService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Relorcamento.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/FuncionarioRepository.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Empresa.java
@@ -17,6 +18,7 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Cliente.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/DeskInstallerApplication.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/OsFuncionario.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/ApClienteController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Formacontaspagar.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Obstecnico.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/ComissaoFuncionario.java
@@ -25,7 +27,9 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/FuncionarioController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/FuncionarioService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/config/DatabaseConfig.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/ApclienteDTO.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Pagamentocontaspagar.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/ApClienteRepository.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Planoconta.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/config/CorsConfig.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Servico.java
