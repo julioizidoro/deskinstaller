@@ -61,7 +61,9 @@ public class EnderecoService {
 
     @Transactional(readOnly = true)
     public List<EnderecoDTO> listarPorCliente(Integer clienteId) {
+        System.out.println(clienteId);
         List<Endereco> enderecos = enderecoRepository.findByCliente(clienteId);
+        System.out.println(enderecos);
         return enderecos.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 

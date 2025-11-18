@@ -22,6 +22,7 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/ComissaoFuncionario.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Controlecheques.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Apcliente.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/FuncionarioController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/FuncionarioService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/config/DatabaseConfig.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Pagamentocontaspagar.java

@@ -18,5 +18,7 @@ import java.util.List;
 @Repository
 public interface FuncionarioRepository extends JpaRepository<Funcionario, Integer> {
 
+    // Busca funcionários pelo status ativo
+    List<Funcionario> findByAtivo(boolean ativo);
 
 }

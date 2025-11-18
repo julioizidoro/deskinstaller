@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Ednereco")
+@Table(name = "endereco")
 public class Endereco implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -59,5 +59,5 @@ public class Endereco implements Serializable {
     @Column(name = "ativo")
     private boolean ativo;
     @Column(name = "cliente_idcliente")
-    private int cliente;
+    private Integer cliente;
 }

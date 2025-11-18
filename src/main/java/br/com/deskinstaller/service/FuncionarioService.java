@@ -2,7 +2,6 @@ package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.FuncionarioDTO;
 import br.com.deskinstaller.model.Funcionario;
-import br.com.deskinstaller.repository.EnderecoRepository;
 import br.com.deskinstaller.repository.FuncionarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,9 +48,33 @@ public class FuncionarioService {
         return funcionarios.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 
+    // método compatível com controller
+    @Transactional(readOnly = true)
+    public List<FuncionarioDTO> listarTodos() {
+        return listarFuncionarios();
+    }
+
     @Transactional(readOnly = true)
     public Optional<FuncionarioDTO> buscarPorId(Integer id) {
         return funcionarioRepository.findById(id).map(this::converterParaDTO);
+    }
+
+    @Transactional
+    public void deletar(Integer id) {
+        if (!funcionarioRepository.existsById(id)) {
+            throw new RuntimeException("Funcionario não encontrado com ID: " + id);
+        }
+        funcionarioRepository.deleteById(id);
+        log.info("Funcionario deletado. ID: {}", id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FuncionarioDTO> listarPorAtivo(Boolean ativo) {
+        if (ativo == null) {
+            return listarTodos();
+        }
+        List<Funcionario> funcionarios = funcionarioRepository.findByAtivo(ativo);
+        return funcionarios.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 
     // Conversores

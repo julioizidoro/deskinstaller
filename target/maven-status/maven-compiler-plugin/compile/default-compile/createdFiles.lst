@@ -22,6 +22,7 @@ br/com/deskinstaller/DeskInstallerApplication.class
 br/com/deskinstaller/model/Loja.class
 br/com/deskinstaller/model/Relservico.class
 br/com/deskinstaller/model/Planoconta.class
+br/com/deskinstaller/controller/FuncionarioController.class
 br/com/deskinstaller/model/Formacontaspagar.class
 br/com/deskinstaller/model/Parametros.class
 br/com/deskinstaller/model/OsFuncionario.class
