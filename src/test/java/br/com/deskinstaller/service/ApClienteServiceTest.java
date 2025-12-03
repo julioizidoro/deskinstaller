@@ -35,8 +35,40 @@ public class ApClienteServiceTest {
 
     @Test
     void listarPorCliente_retornaLista() {
-        Apcliente a1 = new Apcliente(1, new Date(), "NF1", "L1", new Date(), new Date(), "Local1", 2, "M1", "F1", "ME1", "NE1", "MC1", "NC1", "Cap1");
-        Apcliente a2 = new Apcliente(2, new Date(), "NF2", "L2", new Date(), new Date(), "Local2", 2, "M2", "F2", "ME2", "NE2", "MC2", "NC2", "Cap2");
+        Apcliente a1 = Apcliente.builder()
+            .idapCliente(1)
+            .dataCompra(new Date())
+            .notaFiscal("NF1")
+            .loja("L1")
+            .dataInstalacao(new Date())
+            .dataManutencao(new Date())
+            .local("Local1")
+            .cliente(2)
+            .modelo("M1")
+            .fabricante("F1")
+            .modeloEvaporadora("ME1")
+            .nsEvaporadora("NE1")
+            .modeloCodensadora("MC1")
+            .nsCodensadora("NC1")
+            .capacidade("Cap1")
+            .build();
+        Apcliente a2 = Apcliente.builder()
+            .idapCliente(2)
+            .dataCompra(new Date())
+            .notaFiscal("NF2")
+            .loja("L2")
+            .dataInstalacao(new Date())
+            .dataManutencao(new Date())
+            .local("Local2")
+            .cliente(2)
+            .modelo("M2")
+            .fabricante("F2")
+            .modeloEvaporadora("ME2")
+            .nsEvaporadora("NE2")
+            .modeloCodensadora("MC2")
+            .nsCodensadora("NC2")
+            .capacidade("Cap2")
+            .build();
         when(repository.findByCliente(2)).thenReturn(Arrays.asList(a1, a2));
 
         List<ApclienteDTO> result = service.listarPorCliente(2);
@@ -48,8 +80,39 @@ public class ApClienteServiceTest {
 
     @Test
     void salvar_deveRetornarDtoSalvo() {
-        Apcliente input = new Apcliente(null, new Date(), "NF1", "L1", new Date(), new Date(), "Local1", 3, "M1", "F1", "ME1", "NE1", "MC1", "NC1", "Cap1");
-        Apcliente saved = new Apcliente(10, input.getDataCompra(), input.getNotaFiscal(), input.getLoja(), input.getDataInstalacao(), input.getDataManutencao(), input.getLocal(), input.getCliente(), input.getModelo(), input.getFabricante(), input.getModeloEvaporadora(), input.getNsEvaporadora(), input.getModeloCodensadora(), input.getNsCodensadora(), input.getCapacidade());
+        Apcliente input = Apcliente.builder()
+            .dataCompra(new Date())
+            .notaFiscal("NF1")
+            .loja("L1")
+            .dataInstalacao(new Date())
+            .dataManutencao(new Date())
+            .local("Local1")
+            .cliente(3)
+            .modelo("M1")
+            .fabricante("F1")
+            .modeloEvaporadora("ME1")
+            .nsEvaporadora("NE1")
+            .modeloCodensadora("MC1")
+            .nsCodensadora("NC1")
+            .capacidade("Cap1")
+            .build();
+        Apcliente saved = Apcliente.builder()
+            .idapCliente(10)
+            .dataCompra(input.getDataCompra())
+            .notaFiscal(input.getNotaFiscal())
+            .loja(input.getLoja())
+            .dataInstalacao(input.getDataInstalacao())
+            .dataManutencao(input.getDataManutencao())
+            .local(input.getLocal())
+            .cliente(input.getCliente())
+            .modelo(input.getModelo())
+            .fabricante(input.getFabricante())
+            .modeloEvaporadora(input.getModeloEvaporadora())
+            .nsEvaporadora(input.getNsEvaporadora())
+            .modeloCodensadora(input.getModeloCodensadora())
+            .nsCodensadora(input.getNsCodensadora())
+            .capacidade(input.getCapacidade())
+            .build();
         when(repository.save(any(Apcliente.class))).thenReturn(saved);
 
         ApclienteDTO dto = ApclienteDTO.builder()
@@ -69,7 +132,23 @@ public class ApClienteServiceTest {
 
     @Test
     void buscarPorId_sucesso() {
-        Apcliente a = new Apcliente(5, new Date(), "NF", "L", new Date(), new Date(), "Local", 4, "M", "F", "ME", "NE", "MC", "NC", "Cap");
+        Apcliente a = Apcliente.builder()
+            .idapCliente(5)
+            .dataCompra(new Date())
+            .notaFiscal("NF")
+            .loja("L")
+            .dataInstalacao(new Date())
+            .dataManutencao(new Date())
+            .local("Local")
+            .cliente(4)
+            .modelo("M")
+            .fabricante("F")
+            .modeloEvaporadora("ME")
+            .nsEvaporadora("NE")
+            .modeloCodensadora("MC")
+            .nsCodensadora("NC")
+            .capacidade("Cap")
+            .build();
         when(repository.findById(5)).thenReturn(Optional.of(a));
 
         Optional<ApclienteDTO> dto = service.buscarPorId(5);

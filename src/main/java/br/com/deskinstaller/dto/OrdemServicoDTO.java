@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import br.com.deskinstaller.model.Cliente;
-import br.com.deskinstaller.model.Funcionario;
-import br.com.deskinstaller.model.Funcionario;
+import br.com.deskinstaller.model.Endereco;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrdemservicoDTO implements Serializable {
+public class OrdemServicoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Integer idordemServico;
@@ -27,10 +26,11 @@ public class OrdemservicoDTO implements Serializable {
     private double valor;
     private String observacao;
     private String situacao;
+    private Date datasituacao;
     private Double valorComissao;
-    private Funcionario Funcionario;
     private Cliente cliente;
-    private Funcionario funcionario;
+    private Endereco endereco;
     private String indicacao;
+    private boolean recebida;
 }
 

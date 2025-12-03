@@ -26,6 +26,7 @@ public class ApclienteDTO implements Serializable {
     private Date dataManutencao;
     private String local;
     private Integer cliente;
+    private Integer endereco;
     private String modelo;
     private String fabricante;
     private String modeloEvaporadora;
@@ -33,5 +34,6 @@ public class ApclienteDTO implements Serializable {
     private String modeloCodensadora;
     private String nsCodensadora;
     private String capacidade;
+    private Date dataultimamanutencao;
+    private Boolean ativo;
 }
-

@@ -14,7 +14,7 @@
   <groupId>br.com.deskinstaller</groupId>
   <artifactId>deskinstaller-api</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>war</packaging>
 
   <name>avaliacao API REST com Spring Boot</name>
   <description>Projeto avaliacao: API REST com Spring Boot e banco H2</description>
@@ -24,6 +24,9 @@
     <spring.boot.version>3.2.0</spring.boot.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
+    <!-- Forçar encoding UTF-8 para evitar MalformedInputException ao filtrar recursos -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
   <dependencies>
@@ -32,7 +35,14 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-    
+
+    <!-- Tomcat como provided para WAR (evita empacotar o Tomcat embutido) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-tomcat</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Spring Boot Starter Data JPA -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -103,6 +113,34 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <!-- Garantir que o compilador use o annotation processor do Lombok -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.28</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
+      <!-- Forçar recursos com encoding UTF-8 (evita MalformedInputException) -->
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
       </plugin>
 
     </plugins>

@@ -97,7 +97,7 @@ public class FuncionarioService {
         e.setFoneCelular(dto.getFoneCelular());
         e.setValorComissao(dto.getValorComissao());
         e.setFuncao(dto.getFuncao());
-        e.setAtivo(dto.isAtivo());
+        e.setAtivo(dto.getAtivo() != null ? dto.getAtivo() : false);
         return e;
     }
 

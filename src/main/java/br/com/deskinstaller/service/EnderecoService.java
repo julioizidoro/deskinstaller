@@ -100,7 +100,7 @@ public class EnderecoService {
         e.setEstado(dto.getEstado());
         e.setPontoReferencia(dto.getPontoReferencia());
         e.setIdmaps(dto.getIdmaps());
-        e.setAtivo(dto.isAtivo());
+        e.setAtivo(dto.getAtivo() != null ? dto.getAtivo() : false);
         e.setCliente(dto.getCliente());
         return e;
     }

@@ -40,7 +40,7 @@ public class ApClienteService {
     @Transactional(readOnly = true)
     public List<ApclienteDTO> listarPorCliente(Integer clienteId) {
         if (clienteId == null) {
-            return listarTodos();
+            return null;
         }
         List<Apcliente> list = apClienteRepository.findByCliente(clienteId);
         return list.stream().map(this::converterParaDTO).collect(Collectors.toList());
@@ -72,6 +72,7 @@ public class ApClienteService {
                 .dataManutencao(e.getDataManutencao())
                 .local(e.getLocal())
                 .cliente(e.getCliente())
+                .endereco(e.getEndereco())
                 .modelo(e.getModelo())
                 .fabricante(e.getFabricante())
                 .modeloEvaporadora(e.getModeloEvaporadora())
@@ -79,6 +80,8 @@ public class ApClienteService {
                 .modeloCodensadora(e.getModeloCodensadora())
                 .nsCodensadora(e.getNsCodensadora())
                 .capacidade(e.getCapacidade())
+                .dataultimamanutencao(e.getDataultimamanutencao())
+                .ativo(e.isAtivo())
                 .build();
     }
 
@@ -92,6 +95,7 @@ public class ApClienteService {
         e.setDataManutencao(dto.getDataManutencao());
         e.setLocal(dto.getLocal());
         e.setCliente(dto.getCliente());
+        e.setEndereco(dto.getEndereco());
         e.setModelo(dto.getModelo());
         e.setFabricante(dto.getFabricante());
         e.setModeloEvaporadora(dto.getModeloEvaporadora());
@@ -99,6 +103,8 @@ public class ApClienteService {
         e.setModeloCodensadora(dto.getModeloCodensadora());
         e.setNsCodensadora(dto.getNsCodensadora());
         e.setCapacidade(dto.getCapacidade());
+        e.setDataultimamanutencao(dto.getDataultimamanutencao());
+        e.setAtivo(dto.getAtivo() != null ? dto.getAtivo() : false);
         return e;
     }
 

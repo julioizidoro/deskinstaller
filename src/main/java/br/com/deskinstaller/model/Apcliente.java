@@ -17,6 +17,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -27,6 +28,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "apcliente")
 public class Apcliente implements Serializable {
@@ -53,6 +55,8 @@ public class Apcliente implements Serializable {
     private String local;
     @Column(name = "cliente_idcliente")
     private int cliente;
+    @Column(name = "endereco_idendereco")
+    private int endereco;
     @Column(name = "modelo")
     private String modelo;
     @Column(name = "fabricante")
@@ -65,6 +69,10 @@ public class Apcliente implements Serializable {
     private String modeloCodensadora;
     @Column(name = "nsCodensadora")
     private String nsCodensadora;
-     @Column(name = "capacidade")
+    @Column(name = "capacidade")
     private String capacidade;
+    @Column(name = "dataultimamanutencao")
+    private Date dataultimamanutencao;
+    @Column(name = "ativo")
+    private boolean ativo;
 }

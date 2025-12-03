@@ -74,17 +74,25 @@ public class DatabaseConfig {
 
         // Pool de conexões - configurações otimizadas
         hikariConfig.setMaximumPoolSize(10); // Máximo de 10 conexões
-        hikariConfig.setMinimumIdle(2);      // Mínimo de 2 conexões idle
+        hikariConfig.setMinimumIdle(1);      // Mínimo de 1 conexão idle
         hikariConfig.setConnectionTimeout(30000); // 30 segundos timeout
         hikariConfig.setIdleTimeout(600000);      // 10 minutos idle
         hikariConfig.setMaxLifetime(1800000);     // 30 minutos max lifetime
 
+        // Não falhar a inicialização do pool caso o banco esteja temporariamente indisponível
+        // isso permite que o Tomcat e a aplicação subam; já o pool tentará conectar ao DB quando necessário
+        hikariConfig.setInitializationFailTimeout(0);
+
         // Pool name para identificação nos logs
         hikariConfig.setPoolName("DeskInstaller-HikariCP");
 
-        // Configurações de validação de conexão
+        // Validations
+        // Hikari usa isValid() por padrão; mantemos uma query simples para drivers que necessitem
         hikariConfig.setConnectionTestQuery("SELECT 1");
         hikariConfig.setValidationTimeout(5000); // 5 segundos
+
+        // Auto commit (definir conforme necessidade da aplicação)
+        hikariConfig.setAutoCommit(true);
 
         // Propriedades adicionais do MySQL
         hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
@@ -97,6 +105,9 @@ public class DatabaseConfig {
         hikariConfig.addDataSourceProperty("cacheServerConfiguration", "true");
         hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
         hikariConfig.addDataSourceProperty("maintainTimeStats", "false");
+
+        // opcional: tempo para detectar vazamentos
+        hikariConfig.setLeakDetectionThreshold(15000);
 
         HikariDataSource dataSource = new HikariDataSource(hikariConfig);
 
@@ -117,9 +128,8 @@ public class DatabaseConfig {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
 
-        // Pacotes onde estão as entidades JPA
+        // Pacotes onde estão as entidades JPA (ajustado para o pacote atual do projeto)
         em.setPackagesToScan(
-            "com.avaliacao.model",
             "br.com.deskinstaller.model"
         );
 
@@ -151,7 +161,7 @@ public class DatabaseConfig {
         log.info("✅ EntityManagerFactory configurado!");
         log.info("   - DDL Auto: {}", ddlAuto);
         log.info("   - Show SQL: {}", showSql);
-        log.info("   - Pacotes escaneados: com.avaliacao.model, br.com.deskinstaller.model");
+        log.info("   - Pacotes escaneados: br.com.deskinstaller.model");
 
         return em;
     }
@@ -179,4 +189,3 @@ public class DatabaseConfig {
         return url.replaceAll("password=[^&;]*", "password=****");
     }
 }
-
