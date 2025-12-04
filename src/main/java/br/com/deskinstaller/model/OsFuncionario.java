@@ -29,7 +29,7 @@ public class OsFuncionario implements Serializable {
     private Integer ordemServico;
 
     // FK para Funcionario
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "funcionario_idfuncionario", referencedColumnName = "idfuncionario")
     private Funcionario funcionario;
 }

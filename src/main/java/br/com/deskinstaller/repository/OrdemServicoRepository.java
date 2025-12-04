@@ -26,11 +26,11 @@ public interface OrdemServicoRepository extends JpaRepository<Ordemservico, Inte
     List<Ordemservico> findBySituacaoNotInOrDatasituacaoGreaterThanEqual(List<String> situacoes, Date limite);
 
     // Busca com JOIN FETCH para garantir que o cliente seja carregado junto (evita LazyInitializationException / cliente nulo ao converter)
-    @Query("select distinct o from Ordemservico o left join fetch o.cliente where (o.situacao not in :situacoes or o.datasituacao >= :limite)")
+    @Query("select distinct o from Ordemservico o left join fetch o.cliente where (o.situacao not in :situacoes or o.dataServico >= :limite)")
     List<Ordemservico> findBySituacaoNotInOrDatasituacaoGreaterThanEqualFetchCliente(@Param("situacoes") List<String> situacoes, @Param("limite") Date limite);
 
     // BUSCA COM FETCH DE CLIENTE E ENDERECO
-    @Query("select distinct o from Ordemservico o left join fetch o.cliente left join fetch o.endereco where (o.situacao not in :situacoes or o.datasituacao >= :limite)")
+    @Query("select distinct o from Ordemservico o left join fetch o.cliente left join fetch o.endereco where (o.situacao not in :situacoes or o.dataServico >= :limite)")
     List<Ordemservico> findBySituacaoNotInOrDatasituacaoGreaterThanEqualFetchClienteAndEndereco(@Param("situacoes") List<String> situacoes, @Param("limite") Date limite);
 
     // Garantir carregamento do cliente com join fetch para evitar problemas de lazy loading

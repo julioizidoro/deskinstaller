@@ -61,7 +61,7 @@ public class ApClienteService {
     }
 
     // Conversores simples (mapear apenas campos comuns)
-    private ApclienteDTO converterParaDTO(Apcliente e) {
+    public ApclienteDTO converterParaDTO(Apcliente e) {
         if (e == null) return null;
         return ApclienteDTO.builder()
                 .idapCliente(e.getIdapCliente())
@@ -85,7 +85,7 @@ public class ApClienteService {
                 .build();
     }
 
-    private Apcliente converterParaEntidade(ApclienteDTO dto) {
+    public Apcliente converterParaEntidade(ApclienteDTO dto) {
         Apcliente e = new Apcliente();
         e.setIdapCliente(dto.getIdapCliente());
         e.setDataCompra(dto.getDataCompra());
