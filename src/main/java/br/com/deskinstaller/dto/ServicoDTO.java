@@ -13,4 +13,5 @@ public class ServicoDTO {
 
     private Integer idservico;
     private String descricao;
+    private boolean situacao;
 }

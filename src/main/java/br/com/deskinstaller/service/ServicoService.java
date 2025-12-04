@@ -25,7 +25,7 @@ public class ServicoService {
 
     @Transactional(readOnly = true)
     public List<ServicoDTO> listarTodos() {
-        List<Servico> list = servicoRepository.findAll();
+        List<Servico> list = servicoRepository.findBySituacao(true);
         return list.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 
@@ -45,6 +45,7 @@ public class ServicoService {
         return ServicoDTO.builder()
                 .idservico(e.getIdservico())
                 .descricao(e.getDescricao())
+                .situacao(e.isSituacao())
                 .build();
     }
 
@@ -53,6 +54,7 @@ public class ServicoService {
         Servico e = new Servico();
         e.setIdservico(dto.getIdservico());
         e.setDescricao(dto.getDescricao());
+        e.setSituacao(dto.isSituacao());
         return e;
     }
 

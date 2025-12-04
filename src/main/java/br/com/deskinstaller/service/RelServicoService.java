@@ -66,6 +66,7 @@ public class RelServicoService {
                 .ordemservico(e.getOrdemservico())
                 .servico(servicoService.converterParaDTO(e.getServico()))
                 .apCliente(apClienteService.converterParaDTO(e.getApCliente()))
+                .situacao(e.isSituacao())
                 .build();
     }
 
@@ -79,6 +80,7 @@ public class RelServicoService {
         e.setOrdemservico(dto.getOrdemservico());
         e.setServico(servicoService.converterParaEntidade(dto.getServico()));
         e.setApCliente(apClienteService.converterParaEntidade(dto.getApCliente()));
+        e.setSituacao(dto.isSituacao());
         return e;
     }
 

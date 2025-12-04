@@ -18,5 +18,6 @@ import java.util.List;
  */
 @Repository
 public interface ServicoRepository extends JpaRepository<Servico, Integer> {
-
+    // Busca SErvicos com situacao ativa
+    List<Servico> findBySituacao(boolean situacao);
 }

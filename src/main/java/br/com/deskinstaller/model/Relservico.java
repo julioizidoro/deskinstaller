@@ -28,8 +28,8 @@ public class Relservico implements Serializable {
     @Basic(optional = false)
     @Column(name = "idrelServico")
     private Integer idrelServico;
-    @Basic(optional = false)
-    @Column(name = "descricao")
+    @Lob
+    @Column(name = "descricao", columnDefinition = "MEDIUMTEXT")
     private String descricao;
     @Basic(optional = false)
     @Column(name = "quantidade")
@@ -49,6 +49,10 @@ public class Relservico implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "apcliente_idpacliente", referencedColumnName = "idapCliente")
     private Apcliente apCliente;
+
+    @Basic(optional = false)
+    @Column(name = "situacao")
+    private boolean situacao;
 
 
 }
