@@ -28,6 +28,7 @@ public class RelServicoService {
     @Transactional(readOnly = true)
     public List<RelServicoDTO> listarOS(Integer idOrdemServico) {
         List<Relservico> list = relServicoRepository.findByOrdemservico(idOrdemServico);
+        System.out.println(list);
         return list.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 

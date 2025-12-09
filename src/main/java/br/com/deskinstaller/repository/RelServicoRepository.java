@@ -19,6 +19,14 @@ import java.util.List;
 @Repository
 public interface RelServicoRepository extends JpaRepository<Relservico, Integer> {
 
-    // Busca RelServico por idOrdemServico (nome de propriedade correto: ordemservico)
-    List<Relservico> findByOrdemservico(Integer idOrdemServico);
+    /**
+     * Busca todos os itens de serviço relacionados a uma ordem de serviço.
+     *
+     * Observação: o nome da propriedade na entidade `Relservico` é `ordemservico` (lowercase),
+     * por isso o método segue a convenção de nomes do Spring Data: `findBy` + `Ordemservico`.
+     *
+     * @param ordemservico id da ordem de serviço
+     * @return lista de Relservico associados
+     */
+    List<Relservico> findByOrdemservico(int ordemservico);
 }

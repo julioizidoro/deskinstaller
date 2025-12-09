@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/relservicos")
+@RequestMapping("/api/relservico")
 @RequiredArgsConstructor
 @Slf4j
 public class RelServicoController {
@@ -22,8 +22,8 @@ public class RelServicoController {
     private final RelServicoService relServicoService;
 
     @GetMapping("/os/{id}")
-    public ResponseEntity<List<RelServicoDTO>> listarOS(Integer idOrdemServico) {
-        log.info("GET /api/RelServicos - listar Todos os Servicos por id OS");
+    public ResponseEntity<List<RelServicoDTO>> listarOS(@PathVariable("id") Integer idOrdemServico) {
+        log.info("GET /api/relservico/os/{} - listar Servicos por id OS", idOrdemServico);
         return ResponseEntity.ok(relServicoService.listarOS(idOrdemServico));
     }
 

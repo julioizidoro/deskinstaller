@@ -78,7 +78,7 @@ public class FuncionarioService {
     }
 
     // Conversores
-    private FuncionarioDTO converterParaDTO(Funcionario e) {
+    public FuncionarioDTO converterParaDTO(Funcionario e) {
         if (e == null) return null;
         return FuncionarioDTO.builder()
                 .idfuncionario(e.getIdfuncionario())
@@ -90,7 +90,7 @@ public class FuncionarioService {
                 .build();
     }
 
-    private Funcionario converterParaEntidade(FuncionarioDTO dto) {
+    public Funcionario converterParaEntidade(FuncionarioDTO dto) {
         Funcionario e = new Funcionario();
         e.setIdfuncionario(dto.getIdfuncionario());
         e.setNome(dto.getNome());

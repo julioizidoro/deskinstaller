@@ -17,7 +17,7 @@ public class RelServicoDTO {
     private double quantidade;
     private double valor;
     private ServicoDTO servico;
-    private int ordemservico;
+    private Integer ordemservico;
     private ApclienteDTO apCliente;
     private boolean situacao;
 }

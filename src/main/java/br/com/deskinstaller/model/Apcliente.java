@@ -20,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  *
@@ -31,6 +32,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "apcliente")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Apcliente implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

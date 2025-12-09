@@ -11,6 +11,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 /**
  *
@@ -43,11 +45,11 @@ public class Relservico implements Serializable {
     @JoinColumn(name = "servico_idservico", referencedColumnName = "idservico")
     private Servico servico;
     @Column(name = "ordemServico_idordemServico")
-    private int ordemservico;
+    private Integer ordemservico;
 
-    // FK para ApCliente
+    // FK para Funcionario
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "apcliente_idpacliente", referencedColumnName = "idapCliente")
+    @JoinColumn(name = "apcliente_idapCliente", referencedColumnName = "idapCliente")
     private Apcliente apCliente;
 
     @Basic(optional = false)
