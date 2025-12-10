@@ -2,12 +2,14 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Vendedor.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/RelServicoRepository.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/FuncionarioRepository.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/OsFinanceiroDTO.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/ServicoDTO.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Empresa.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Grupoconta.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/config/DatabaseConnectionValidator.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/OsFuncionarioController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Loja.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/ObsTecnicoController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/RelServicoService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/OsFuncionarioService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/ClienteDTO.java
@@ -16,6 +18,7 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/OsFuncionario.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/ApClienteController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Formacontaspagar.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/OsFinanceiroService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Controlecheques.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/FuncionarioService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/config/DatabaseConfig.java
@@ -25,6 +28,7 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/ServicoService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/EnderecoService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/OrdemServicoRepository.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/OsFinanceiroController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Ordemservico.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/EnderecoController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/EnderecoRepository.java
@@ -39,12 +43,16 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/ApClienteService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Relorcamento.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/RelServicoDTO.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/OsFinanceiroRepository.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/ObsTecnicoService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/OrdemServicoController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/ServicoController.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/EnderecoDTO.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/repository/ObsTecnicoRepository.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/FuncionarioDTO.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Orcamento.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/DatabaseMonitorController.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/ObsTecnicoDTO.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Cliente.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/OrdemservicoService.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Obstecnico.java
@@ -58,6 +66,7 @@
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/dto/OrdemServicoDTO.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Banco.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/controller/ClienteController.java
+/Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/OsFinanceiro.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Funcionario.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/model/Endereco.java
 /Users/julioizidoro/Git/deskInstalller-api/src/main/java/br/com/deskinstaller/service/ClienteService.java
