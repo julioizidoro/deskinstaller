@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,9 +41,18 @@ public class ApClienteService {
     @Transactional(readOnly = true)
     public List<ApclienteDTO> listarPorCliente(Integer clienteId) {
         if (clienteId == null) {
-            return null;
+            return Collections.emptyList();
         }
         List<Apcliente> list = apClienteRepository.findByCliente(clienteId);
+        return list.stream().map(this::converterParaDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<ApclienteDTO> listarPorClienteEndereco(Integer clienteId, Integer enderecoId) {
+        if (clienteId == null || enderecoId == null) {
+            return Collections.emptyList();
+        }
+        List<Apcliente> list = apClienteRepository.findByClienteAndEndereco(clienteId, enderecoId);
         return list.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 

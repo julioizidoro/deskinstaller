@@ -21,4 +21,7 @@ public interface ApClienteRepository extends JpaRepository<Apcliente, Integer> {
     // Busca ApCliente por id do cliente (coluna cliente / cliente_idcliente)
     List<Apcliente> findByCliente(Integer idCliente);
 
+    // Busca ApCliente por id do cliente e id do endereco (colunas cliente / endereco)
+    List<Apcliente> findByClienteAndEndereco(Integer idCliente, Integer idEndereco);
+
 }

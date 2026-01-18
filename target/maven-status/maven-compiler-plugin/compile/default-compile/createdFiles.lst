@@ -2,11 +2,13 @@ br/com/deskinstaller/controller/RelServicoController.class
 br/com/deskinstaller/controller/ServicoController.class
 br/com/deskinstaller/repository/FuncionarioRepository.class
 br/com/deskinstaller/dto/ServicoDTO.class
+br/com/deskinstaller/service/PdfGeneratorService.class
 br/com/deskinstaller/config/DatabaseConfig.class
 br/com/deskinstaller/dto/OsFuncionarioDTO.class
 br/com/deskinstaller/config/DatabaseConnectionValidator.class
 br/com/deskinstaller/dto/EnderecoDTO.class
 br/com/deskinstaller/repository/ClienteRepository.class
+br/com/deskinstaller/controller/OsPDFController.class
 br/com/deskinstaller/service/ServicoService.class
 br/com/deskinstaller/model/Relorcamento.class
 br/com/deskinstaller/repository/OsFinanceiroRepository.class
@@ -26,6 +28,7 @@ br/com/deskinstaller/dto/ApclienteDTO$ApclienteDTOBuilder.class
 br/com/deskinstaller/controller/ObsTecnicoController.class
 br/com/deskinstaller/dto/EnderecoDTO$EnderecoDTOBuilder.class
 br/com/deskinstaller/model/Servico.class
+br/com/deskinstaller/dto/OsDTO$ServicoDTO$ServicoDTOBuilder.class
 br/com/deskinstaller/repository/ServicoRepository.class
 br/com/deskinstaller/model/Apcliente.class
 br/com/deskinstaller/controller/ClienteController.class
@@ -35,10 +38,13 @@ br/com/deskinstaller/service/RelServicoService.class
 br/com/deskinstaller/DeskInstallerApplication.class
 br/com/deskinstaller/model/Loja.class
 br/com/deskinstaller/model/Relservico.class
+br/com/deskinstaller/service/OsPDFService.class
+br/com/deskinstaller/dto/OsDTO$ServicoDTO.class
 br/com/deskinstaller/model/Planoconta.class
 br/com/deskinstaller/service/ApClienteService.class
 br/com/deskinstaller/controller/OrdemServicoController.class
 br/com/deskinstaller/controller/FuncionarioController.class
+br/com/deskinstaller/dto/OsDTO.class
 br/com/deskinstaller/model/Formacontaspagar.class
 br/com/deskinstaller/model/Parametros.class
 br/com/deskinstaller/repository/RelServicoRepository.class
@@ -61,6 +67,7 @@ br/com/deskinstaller/service/ClienteService.class
 br/com/deskinstaller/model/Subgrupo.class
 br/com/deskinstaller/repository/OsFuncionarioRepository.class
 br/com/deskinstaller/service/FuncionarioService.class
+br/com/deskinstaller/dto/OsDTO$OsDTOBuilder.class
 br/com/deskinstaller/model/Orcamento.class
 br/com/deskinstaller/dto/FuncionarioDTO$FuncionarioDTOBuilder.class
 br/com/deskinstaller/controller/DatabaseMonitorController.class
@@ -73,6 +80,7 @@ br/com/deskinstaller/dto/ServicoDTO$ServicoDTOBuilder.class
 br/com/deskinstaller/model/Endereco.class
 br/com/deskinstaller/controller/EnderecoController.class
 br/com/deskinstaller/repository/ObsTecnicoRepository.class
+br/com/deskinstaller/exception/RestExceptionHandler.class
 br/com/deskinstaller/repository/ApClienteRepository.class
 br/com/deskinstaller/model/Empresa.class
 br/com/deskinstaller/model/Banco.class

@@ -35,6 +35,12 @@ public class ApClienteController {
         return ResponseEntity.ok(apClienteService.listarPorCliente(clienteId));
     }
 
+    @GetMapping("/cliente/{clienteId}/endereco/{enderecoId}")
+    public ResponseEntity<List<ApclienteDTO>> listarPorClienteEndereco(@PathVariable Integer clienteId, @PathVariable Integer enderecoId) {
+        log.info("GET /api/aparelhos/cliente/{}/endereoc - listarPorClienteEndereco", clienteId + " - " + enderecoId);
+        return ResponseEntity.ok(apClienteService.listarPorCliente(clienteId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
         log.info("GET /api/aparelhos/{} - buscarPorId", id);

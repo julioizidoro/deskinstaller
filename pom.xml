@@ -60,6 +60,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
       <optional>true</optional>
     </dependency>
 
@@ -84,6 +85,23 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-thymeleaf</artifactId>
+      </dependency>
+
+      <!-- OpenHTMLtoPDF (HTML -> PDF) -->
+      <dependency>
+          <groupId>com.openhtmltopdf</groupId>
+          <artifactId>openhtmltopdf-pdfbox</artifactId>
+          <version>1.0.10</version>
+      </dependency>
+      <dependency>
+          <groupId>com.openhtmltopdf</groupId>
+          <artifactId>openhtmltopdf-slf4j</artifactId>
+          <version>1.0.10</version>
+      </dependency>
   </dependencies>
 
   <build>
@@ -119,16 +137,20 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.13.0</version>
         <configuration>
           <source>${maven.compiler.source}</source>
           <target>${maven.compiler.target}</target>
+          <release>${java.version}</release>
           <encoding>${project.build.sourceEncoding}</encoding>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
           <annotationProcessorPaths>
             <path>
               <groupId>org.projectlombok</groupId>
               <artifactId>lombok</artifactId>
-              <version>1.18.28</version>
+              <version>1.18.30</version>
             </path>
           </annotationProcessorPaths>
         </configuration>
