@@ -1,6 +1,7 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.ObsTecnicoDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.Obstecnico;
 import br.com.deskinstaller.repository.ObsTecnicoRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class ObsTecnicoService {
 
     private final ObsTecnicoRepository obsTecnicoRepository;
     private final FuncionarioService funcionarioService;
+    private final DomainValidationService domainValidationService;
 
     @Transactional(readOnly = true)
     public List<ObsTecnicoDTO> listarOS(Integer idOrdemServico) {
@@ -38,10 +40,24 @@ public class ObsTecnicoService {
     @Transactional
     public ObsTecnicoDTO salvar(ObsTecnicoDTO dto) {
         log.info("Salvando ObsTecnico: {}", dto);
+        if (dto.getIdobsTecnico() != null && !obsTecnicoRepository.existsById(dto.getIdobsTecnico())) {
+            throw new ResourceNotFoundException("ObsTecnico não encontrado com ID: " + dto.getIdobsTecnico());
+        }
+        domainValidationService.requireOrdemServico(dto.getOrdemServico());
+        domainValidationService.requireFuncionario(dto.getFuncionario().getIdfuncionario());
         Obstecnico e = converterParaEntidade(dto);
         Obstecnico salvo = obsTecnicoRepository.save(e);
         log.info("ObsTecnico salvo com sucesso. ID: {}", salvo.getIdobsTecnico());
         return converterParaDTO(salvo);
+    }
+
+    @Transactional
+    public void deletar(Integer id) {
+        if (!obsTecnicoRepository.existsById(id)) {
+            throw new ResourceNotFoundException("ObsTecnico não encontrado com ID: " + id);
+        }
+        obsTecnicoRepository.deleteById(id);
+        log.info("ObsTecnico deletado. ID: {}", id);
     }
 
     // Conversores simples (mapear apenas campos comuns)
@@ -65,7 +81,7 @@ public class ObsTecnicoService {
         e.setDatahora(dto.getDatahora());
         e.setAtiva(dto.getAtiva());
         e.setOrdemServico(dto.getOrdemServico());
-        e.setFuncionario(funcionarioService.converterParaEntidade(dto.getFuncionario()));
+        e.setFuncionario(domainValidationService.requireFuncionario(dto.getFuncionario().getIdfuncionario()));
         return e;
     }
 }

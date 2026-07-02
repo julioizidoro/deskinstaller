@@ -1,6 +1,7 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.ApclienteDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.Apcliente;
 import br.com.deskinstaller.repository.ApClienteRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,18 @@ import java.util.stream.Collectors;
 public class ApClienteService {
 
     private final ApClienteRepository apClienteRepository;
+    private final DomainValidationService domainValidationService;
 
     @Transactional
     public ApclienteDTO salvar(ApclienteDTO dto) {
         log.info("Salvando Apcliente: {}", dto);
+        if (dto.getIdapCliente() != null && !apClienteRepository.existsById(dto.getIdapCliente())) {
+            throw new ResourceNotFoundException("Apcliente não encontrado com ID: " + dto.getIdapCliente());
+        }
+        domainValidationService.requireCliente(dto.getCliente());
+        if (dto.getEndereco() != null) {
+            domainValidationService.validateEnderecoDoCliente(dto.getEndereco(), dto.getCliente());
+        }
         Apcliente e = converterParaEntidade(dto);
         Apcliente salvo = apClienteRepository.save(e);
         log.info("Apcliente salvo com sucesso. ID: {}", salvo.getIdapCliente());
@@ -64,7 +73,7 @@ public class ApClienteService {
     @Transactional
     public void deletar(Integer id) {
         if (!apClienteRepository.existsById(id)) {
-            throw new RuntimeException("Apcliente não encontrado com ID: " + id);
+            throw new ResourceNotFoundException("Apcliente não encontrado com ID: " + id);
         }
         apClienteRepository.deleteById(id);
         log.info("Apcliente deletado. ID: {}", id);

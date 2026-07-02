@@ -1,6 +1,7 @@
 package br.com.deskinstaller.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import br.com.deskinstaller.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,11 +27,11 @@ public class PdfGeneratorService {
      * @param templateName Nome do template (sem extensão .html)
      * @param context Contexto com variáveis para o template
      * @return byte array do PDF gerado
-     * @throws RuntimeException se houver erro na geração do PDF
+     * @throws BusinessException se houver erro na geração do PDF
      */
     public byte[] gerarPdfDeTemplate(String templateName, Context context) {
         try {
-            log.info("Gerando PDF a partir do template: {}", templateName);
+            log.info("Gerando PDF a partir do template {}", templateName);
 
             // 1. Renderizar HTML usando Thymeleaf
             String html = templateEngine.process(templateName, context);
@@ -40,7 +41,7 @@ public class PdfGeneratorService {
 
         } catch (Exception e) {
             log.error("Erro ao gerar PDF do template {}: {}", templateName, e.getMessage(), e);
-            throw new RuntimeException("Erro ao gerar PDF: " + e.getMessage(), e);
+            throw new BusinessException("Erro ao gerar PDF: " + e.getMessage());
         }
     }
 
@@ -56,7 +57,7 @@ public class PdfGeneratorService {
             builder.toStream(outputStream);
             builder.run();
 
-            log.info("PDF gerado com sucesso. Tamanho: {} bytes", outputStream.size());
+            log.debug("PDF gerado com sucesso. Tamanho: {} bytes", outputStream.size());
             return outputStream.toByteArray();
 
         } catch (Exception e) {
@@ -65,4 +66,3 @@ public class PdfGeneratorService {
         }
     }
 }
-

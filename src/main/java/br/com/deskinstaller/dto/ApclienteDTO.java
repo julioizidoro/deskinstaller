@@ -1,5 +1,6 @@
 package br.com.deskinstaller.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,8 @@ public class ApclienteDTO implements Serializable {
     private Date dataInstalacao;
     private Date dataManutencao;
     private String local;
+
+    @NotNull(message = "cliente é obrigatório")
     private Integer cliente;
     private Integer endereco;
     private String modelo;

@@ -1,15 +1,13 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.OsDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.*;
 import br.com.deskinstaller.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
-
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,17 +33,17 @@ public class OsPDFService {
      *
      * @param idOrdemServico ID da ordem de serviço
      * @return OsDTO preenchido com dados do banco
-     * @throws RuntimeException se a OS não for encontrada
+     * @throws ResourceNotFoundException se a OS não for encontrada
      */
     @Transactional(readOnly = true)
     public OsDTO buscarOsParaVisualizacao(Integer idOrdemServico) {
         log.info("Buscando dados da OS {} para visualização HTML/PDF", idOrdemServico);
 
         // 1. Buscar ordem de serviço
-        Ordemservico os = ordemServicoRepository.findById(idOrdemServico)
+        Ordemservico os = ordemServicoRepository.findByIdWithCliente(idOrdemServico)
                 .orElseThrow(() -> {
                     log.warn("Ordem de Serviço não encontrada: {}", idOrdemServico);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordem de Serviço não encontrada: " + idOrdemServico);
+                    return new ResourceNotFoundException("Ordem de Serviço não encontrada: " + idOrdemServico);
                 });
 
         // 2. Buscar dados relacionados (já vêm como objetos do relacionamento JPA)
@@ -55,12 +53,12 @@ public class OsPDFService {
         List<OsFuncionario> listaOsFuncionario = osFuncionarioRepository.findByOrdemServico(idOrdemServico);
 
         // Log de diagnóstico para entender problemas de 404/500
-        log.info("OS encontrada: id={} ; clienteId={} ; enderecoId={}",
+        log.debug("OS encontrada: id={} ; clienteId={} ; enderecoId={}",
                 os.getIdordemServico(),
                 cliente != null && cliente.getIdcliente() != null ? cliente.getIdcliente() : "null",
                 endereco != null && endereco.getIdendereco() != null ? endereco.getIdendereco() : "null");
 
-        log.info("Serviços encontrados: {} ; Funcionários da OS: {}",
+        log.debug("Serviços encontrados: {} ; Funcionários da OS: {}",
                 servicos != null ? servicos.size() : 0,
                 listaOsFuncionario != null ? listaOsFuncionario.size() : 0);
 
@@ -266,4 +264,3 @@ public class OsPDFService {
         return String.format("%.3f", quantidade).replace(".", ",");
     }
 }
-

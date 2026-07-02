@@ -1,6 +1,8 @@
 package br.com.deskinstaller.controller;
 
 import br.com.deskinstaller.dto.ClienteDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import br.com.deskinstaller.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,12 +46,11 @@ public class ClienteController {
      * GET /api/clientes/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ClienteDTO> buscarPorId(@PathVariable Integer id) {
         log.info("GET /api/clientes/{} - Buscar cliente por ID", id);
         return clienteService.buscarPorId(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(criarMensagemErro("Cliente não encontrado com ID: " + id)));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com ID: " + id));
     }
 
     /**
@@ -68,12 +69,11 @@ public class ClienteController {
      * GET /api/clientes/buscar/email?email=joao@example.com
      */
     @GetMapping("/buscar/email")
-    public ResponseEntity<?> buscarPorEmail(@RequestParam String email) {
+    public ResponseEntity<ClienteDTO> buscarPorEmail(@RequestParam String email) {
         log.info("GET /api/clientes/buscar/email?email={}", email);
         return clienteService.buscarPorEmail(email)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(criarMensagemErro("Cliente não encontrado com email: " + email)));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com email: " + email));
     }
 
     /**
@@ -119,17 +119,16 @@ public class ClienteController {
      * Cria novo cliente
      * POST /api/clientes
      */
-    @PostMapping("/salvar")
-    public ResponseEntity<?> criar(@RequestBody ClienteDTO clienteDTO) {
+    @PostMapping
+    public ResponseEntity<ClienteDTO> criar(@Valid @RequestBody ClienteDTO clienteDTO) {
         log.info("POST /api/clientes - Criar novo cliente: {}", clienteDTO.getNome());
-        try {
-            ClienteDTO clienteSalvo = clienteService.salvar(clienteDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
-        } catch (RuntimeException e) {
-            log.error("Erro ao criar cliente", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(criarMensagemErro(e.getMessage()));
-        }
+        ClienteDTO clienteSalvo = clienteService.salvar(clienteDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteSalvo);
+    }
+
+    @PostMapping("/salvar")
+    public ResponseEntity<ClienteDTO> criarLegado(@Valid @RequestBody ClienteDTO clienteDTO) {
+        return criar(clienteDTO);
     }
 
     /**
@@ -137,23 +136,11 @@ public class ClienteController {
      * PUT /api/clientes/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Integer id, @RequestBody ClienteDTO clienteDTO) {
+    public ResponseEntity<ClienteDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody ClienteDTO clienteDTO) {
         log.info("PUT /api/clientes/{} - Atualizar cliente", id);
-        try {
-            // Verifica se cliente existe
-            if (clienteService.buscarPorId(id).isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(criarMensagemErro("Cliente não encontrado com ID: " + id));
-            }
-
-            clienteDTO.setIdcliente(id); // Garante que está atualizando o ID correto
-            ClienteDTO clienteAtualizado = clienteService.salvar(clienteDTO);
-            return ResponseEntity.ok(clienteAtualizado);
-        } catch (RuntimeException e) {
-            log.error("Erro ao atualizar cliente", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(criarMensagemErro(e.getMessage()));
-        }
+        clienteDTO.setIdcliente(id);
+        ClienteDTO clienteAtualizado = clienteService.salvar(clienteDTO);
+        return ResponseEntity.ok(clienteAtualizado);
     }
 
     /**
@@ -161,16 +148,10 @@ public class ClienteController {
      * DELETE /api/clientes/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
         log.info("DELETE /api/clientes/{} - Deletar cliente", id);
-        try {
-            clienteService.deletar(id);
-            return ResponseEntity.ok(criarMensagemSucesso("Cliente deletado com sucesso"));
-        } catch (RuntimeException e) {
-            log.error("Erro ao deletar cliente", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(criarMensagemErro(e.getMessage()));
-        }
+        clienteService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -200,20 +181,4 @@ public class ClienteController {
         return ResponseEntity.ok(response);
     }
 
-    // ===== Métodos auxiliares =====
-
-    private Map<String, Object> criarMensagemErro(String mensagem) {
-        Map<String, Object> erro = new HashMap<>();
-        erro.put("erro", mensagem);
-        erro.put("timestamp", new Date());
-        return erro;
-    }
-
-    private Map<String, Object> criarMensagemSucesso(String mensagem) {
-        Map<String, Object> sucesso = new HashMap<>();
-        sucesso.put("mensagem", mensagem);
-        sucesso.put("timestamp", new Date());
-        return sucesso;
-    }
 }
-

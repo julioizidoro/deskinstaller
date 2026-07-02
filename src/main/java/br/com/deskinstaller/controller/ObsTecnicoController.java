@@ -1,7 +1,8 @@
 package br.com.deskinstaller.controller;
 
-
 import br.com.deskinstaller.dto.ObsTecnicoDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import br.com.deskinstaller.service.ObsTecnicoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/obstecnico")
@@ -28,35 +27,34 @@ public class ObsTecnicoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ObsTecnicoDTO> buscarPorId(@PathVariable Integer id) {
         log.info("GET /api/obstecnico/{} - buscarPorId", id);
         return obsTecnicoService.buscarPorId(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro("ObsTecnico não encontrado com ID: " + id)));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("ObsTecnico não encontrado com ID: " + id));
+    }
+
+    @PostMapping
+    public ResponseEntity<ObsTecnicoDTO> salvar(@Valid @RequestBody ObsTecnicoDTO dto) {
+        log.info("POST /api/obstecnico - salvar: {}", dto);
+        ObsTecnicoDTO salvo = obsTecnicoService.salvar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<?> salvar(@RequestBody ObsTecnicoDTO dto) {
-        try {
-            log.info("POST /api/obstenico/salvar - salvar: {}", dto);
-            ObsTecnicoDTO salvo = obsTecnicoService.salvar(dto);
-            HttpStatus status = (dto.getIdobsTecnico() == null) ? HttpStatus.CREATED : HttpStatus.OK;
-            return ResponseEntity.status(status).body(salvo);
-        } catch (RuntimeException e) {
-            log.error("Erro ao salvar ObsTecnico", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(criarErro(e.getMessage()));
-        }
+    public ResponseEntity<ObsTecnicoDTO> salvarLegado(@Valid @RequestBody ObsTecnicoDTO dto) {
+        return salvar(dto);
     }
 
-  private Map<String, Object> criarErro(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("erro", msg);
-        return m;
+    @PutMapping("/{id}")
+    public ResponseEntity<ObsTecnicoDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody ObsTecnicoDTO dto) {
+        dto.setIdobsTecnico(id);
+        return ResponseEntity.ok(obsTecnicoService.salvar(dto));
     }
 
-    private Map<String, Object> criarMensagem(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("mensagem", msg);
-        return m;
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        obsTecnicoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

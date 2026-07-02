@@ -25,6 +25,9 @@ public class ApClienteServiceTest {
     @Mock
     private ApClienteRepository repository;
 
+    @Mock
+    private DomainValidationService domainValidationService;
+
     @InjectMocks
     private ApClienteService service;
 
@@ -114,6 +117,7 @@ public class ApClienteServiceTest {
             .capacidade(input.getCapacidade())
             .build();
         when(repository.save(any(Apcliente.class))).thenReturn(saved);
+        when(domainValidationService.requireCliente(3)).thenReturn(new br.com.deskinstaller.model.Cliente());
 
         ApclienteDTO dto = ApclienteDTO.builder()
                 .dataCompra(input.getDataCompra())

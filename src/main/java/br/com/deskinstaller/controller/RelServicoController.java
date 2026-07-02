@@ -1,7 +1,8 @@
 package br.com.deskinstaller.controller;
 
-
 import br.com.deskinstaller.dto.RelServicoDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import br.com.deskinstaller.service.RelServicoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,12 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/api/relservico")
+@RequestMapping({"/api/rel-servicos", "/api/relservico"})
 @RequiredArgsConstructor
 @Slf4j
 public class RelServicoController {
@@ -23,51 +22,44 @@ public class RelServicoController {
 
     @GetMapping("/os/{id}")
     public ResponseEntity<List<RelServicoDTO>> listarOS(@PathVariable("id") Integer idOrdemServico) {
-        log.info("GET /api/relservico/os/{} - listar Servicos por id OS", idOrdemServico);
+        log.info("GET /api/rel-servicos/os/{} - listar serviços por ordem", idOrdemServico);
         return ResponseEntity.ok(relServicoService.listarOS(idOrdemServico));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
-        log.info("GET /api/RelServicos/{} - buscarPorId", id);
+    public ResponseEntity<RelServicoDTO> buscarPorId(@PathVariable Integer id) {
+        log.info("GET /api/rel-servicos/{} - buscarPorId", id);
         return relServicoService.buscarPorId(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro("RelServico não encontrado com ID: " + id)));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Relação de serviço não encontrada com ID: " + id));
+    }
+
+    @PostMapping
+    public ResponseEntity<RelServicoDTO> salvar(@Valid @RequestBody RelServicoDTO dto) {
+        log.info("POST /api/rel-servicos - salvar relação de serviço");
+        RelServicoDTO salvo = relServicoService.salvar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<?> salvar(@RequestBody RelServicoDTO dto) {
-        try {
-            log.info("POST /api/servicos/salvar - salvar: {}", dto);
-            RelServicoDTO salvo = relServicoService.salvar(dto);
-            HttpStatus status = (dto.getIdrelServico() == null) ? HttpStatus.CREATED : HttpStatus.OK;
-            return ResponseEntity.status(status).body(salvo);
-        } catch (RuntimeException e) {
-            log.error("Erro ao salvar RelServico", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(criarErro(e.getMessage()));
-        }
+    public ResponseEntity<RelServicoDTO> salvarLegado(@Valid @RequestBody RelServicoDTO dto) {
+        return salvar(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RelServicoDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody RelServicoDTO dto) {
+        dto.setIdrelServico(id);
+        return ResponseEntity.ok(relServicoService.salvar(dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Integer id) {
-        try {
-            relServicoService.deletar(id);
-            return ResponseEntity.ok(criarMensagem("RelServico deletado com sucesso"));
-        } catch (RuntimeException e) {
-            log.error("Erro ao deletar relServico", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro(e.getMessage()));
-        }
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        relServicoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 
-    private Map<String, Object> criarErro(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("erro", msg);
-        return m;
-    }
-
-    private Map<String, Object> criarMensagem(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("mensagem", msg);
-        return m;
+    @DeleteMapping("/deletar/{id}")
+    public ResponseEntity<Void> deletarLegado(@PathVariable Integer id) {
+        return deletar(id);
     }
 }

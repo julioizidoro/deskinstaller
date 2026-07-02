@@ -1,6 +1,7 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.OsFinanceiroDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.OsFinanceiro;
 import br.com.deskinstaller.repository.OsFinanceiroRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,12 @@ import java.util.stream.Collectors;
 public class OsFinanceiroService {
 
     private final OsFinanceiroRepository osFinanceiroRepository;
+    private final DomainValidationService domainValidationService;
 
 
     @Transactional(readOnly = true)
     public List<OsFinanceiroDTO> listarOS(Integer idOrdemServico) {
         List<OsFinanceiro> list = osFinanceiroRepository.findByOrdemservico(idOrdemServico);
-        System.out.println(list);
         return list.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 
@@ -39,6 +40,10 @@ public class OsFinanceiroService {
     @Transactional
     public OsFinanceiroDTO salvar(OsFinanceiroDTO dto) {
         log.info("Salvando OsFinanceiro: {}", dto);
+        if (dto.getIdosfinanceiro() != null && !osFinanceiroRepository.existsById(dto.getIdosfinanceiro())) {
+            throw new ResourceNotFoundException("OsFinanceiro não encontrado com ID: " + dto.getIdosfinanceiro());
+        }
+        domainValidationService.requireOrdemServico(dto.getOrdemservico());
         OsFinanceiro e = converterParaEntidade(dto);
         OsFinanceiro salvo = osFinanceiroRepository.save(e);
         log.info("OsFinanceiro salvo com sucesso. ID: {}", salvo.getIdosfinanceiro());
@@ -48,7 +53,7 @@ public class OsFinanceiroService {
     @Transactional
     public void deletar(Integer id) {
         if (!osFinanceiroRepository.existsById(id)) {
-            throw new RuntimeException("OsFinanceiro não encontrado com ID: " + id);
+            throw new ResourceNotFoundException("OsFinanceiro não encontrado com ID: " + id);
         }
         osFinanceiroRepository.deleteById(id);
         log.info("RelServico deletado. ID: {}", id);
@@ -75,8 +80,8 @@ public class OsFinanceiroService {
         e.setData(dto.getData());
         e.setParcelas(dto.getParcelas());
         e.setOrdemservico(dto.getOrdemservico());
-        e.setValordesconto(e.getValordesconto());
-        e.setValorrecebido(e.getValorrecebido());
+        e.setValordesconto(dto.getValordesconto());
+        e.setValorrecebido(dto.getValorrecebido());
         e.setFormapagamento(dto.getFormapagamento());
         return e;
     }

@@ -1,43 +1,99 @@
 package br.com.deskinstaller.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class RestExceptionHandler {
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiErrorResponse> handleBusiness(BusinessException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        List<String> details = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.toList());
+
+        return buildResponse(HttpStatus.BAD_REQUEST, "Dados de entrada inválidos", request.getRequestURI(), details);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        List<String> details = ex.getConstraintViolations()
+                .stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .collect(Collectors.toList());
+        return buildResponse(HttpStatus.BAD_REQUEST, "Parâmetros inválidos", request.getRequestURI(), details);
+    }
+
+    @ExceptionHandler({
+            MissingServletRequestParameterException.class,
+            MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class
+    })
+    public ResponseEntity<ApiErrorResponse> handleBadRequest(Exception ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Requisição inválida", request.getRequestURI(), ex.getMessage());
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String,Object>> handleResponseStatus(ResponseStatusException ex) {
-        Map<String,Object> body = new LinkedHashMap<>();
-        body.put("timestamp", Instant.now().toString());
-        body.put("status", ex.getStatusCode().value());
+    public ResponseEntity<ApiErrorResponse> handleResponseStatus(ResponseStatusException ex, HttpServletRequest request) {
         HttpStatusCode statusCode = ex.getStatusCode();
-        String reason;
-        if (statusCode instanceof HttpStatus) {
-            reason = ((HttpStatus) statusCode).getReasonPhrase();
-        } else {
-            reason = statusCode.toString();
+        String message = ex.getReason() != null ? ex.getReason() : statusCode.toString();
+        return buildResponse(ex.getStatusCode(), message, request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request) {
+        String mostSpecificMessage = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : ex.getMessage();
+
+        if (mostSpecificMessage != null && mostSpecificMessage.contains("funcionario_idfuncionario")) {
+            return buildResponse(
+                    HttpStatus.CONFLICT,
+                    "Estrutura da base de dados desatualizada para ordem de serviço. Execute as migrações Flyway.",
+                    request.getRequestURI(),
+                    null
+            );
         }
-        body.put("error", reason);
-        body.put("message", ex.getReason());
-        return ResponseEntity.status(ex.getStatusCode()).body(body);
+
+        return buildResponse(HttpStatus.CONFLICT, "Violação de integridade de dados", request.getRequestURI(), null);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String,Object>> handleGeneric(Exception ex) {
-        Map<String,Object> body = new LinkedHashMap<>();
-        body.put("timestamp", Instant.now().toString());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("error", "Internal Server Error");
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno do servidor", request.getRequestURI(), null);
+    }
+
+    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, String path, Object details) {
+        return buildResponse((HttpStatusCode) status, message, path, details);
+    }
+
+    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatusCode statusCode, String message, String path, Object details) {
+        return ResponseEntity.status(statusCode).body(ApiErrorResponse.of(statusCode, message, path, details));
     }
 }

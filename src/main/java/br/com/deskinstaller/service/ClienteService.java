@@ -1,6 +1,8 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.ClienteDTO;
+import br.com.deskinstaller.exception.BusinessException;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.Cliente;
 import br.com.deskinstaller.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
@@ -122,6 +124,25 @@ public class ClienteService {
     public ClienteDTO salvar(ClienteDTO clienteDTO) {
         log.info("Salvando cliente: {}", clienteDTO.getNome());
 
+        if (clienteDTO.getIdcliente() == null && clienteDTO.getEmail() != null
+                && !clienteDTO.getEmail().isBlank()
+                && clienteRepository.existsByEmail(clienteDTO.getEmail())) {
+            throw new BusinessException("Já existe cliente cadastrado com o email informado");
+        }
+
+        if (clienteDTO.getIdcliente() != null) {
+            Cliente existente = clienteRepository.findById(clienteDTO.getIdcliente())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Cliente não encontrado com ID: " + clienteDTO.getIdcliente()));
+
+            if (clienteDTO.getEmail() != null && !clienteDTO.getEmail().isBlank()) {
+                clienteRepository.findByEmail(clienteDTO.getEmail())
+                        .filter(cliente -> !cliente.getIdcliente().equals(existente.getIdcliente()))
+                        .ifPresent(cliente -> {
+                            throw new BusinessException("Já existe cliente cadastrado com o email informado");
+                        });
+            }
+        }
 
         Cliente cliente = converterParaEntidade(clienteDTO);
         Cliente clienteSalvo = clienteRepository.save(cliente);
@@ -137,7 +158,7 @@ public class ClienteService {
     public void deletar(Integer id) {
         log.info("Deletando cliente ID: {}", id);
         if (!clienteRepository.existsById(id)) {
-            throw new RuntimeException("Cliente não encontrado com ID: " + id);
+            throw new ResourceNotFoundException("Cliente não encontrado com ID: " + id);
         }
         clienteRepository.deleteById(id);
         log.info("Cliente deletado com sucesso");
@@ -201,4 +222,3 @@ public class ClienteService {
         return cliente;
     }
 }
-

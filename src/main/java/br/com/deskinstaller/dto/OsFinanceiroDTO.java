@@ -6,6 +6,7 @@ package br.com.deskinstaller.dto;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,5 +29,7 @@ public class OsFinanceiroDTO implements Serializable {
     private Float valordesconto;
     private Float valorrecebido;
     private String formapagamento;
-    private int ordemservico;
+
+    @NotNull(message = "ordemservico é obrigatória")
+    private Integer ordemservico;
 }

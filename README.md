@@ -1,279 +1,304 @@
-# 🏢 DeskInstaller - Sistema de Gestão
+# DeskInstaller API
 
-Sistema completo de gestão desenvolvido com **Spring Boot 3** + **MySQL** + **Lombok** para gerenciamento de clientes, ordens de serviço, funcionários e operações da empresa DeskInstaller.
+API REST em Spring Boot para gestão de clientes, endereços, ordens de serviço, funcionários e geração de PDF.
 
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue.svg)](https://www.mysql.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## Stack
 
----
+- Java 17
+- Spring Boot 3.2
+- Spring Data JPA
+- MySQL 8 em produção
+- H2 em testes
+- Lombok
+- Thymeleaf + OpenHTMLtoPDF
+- JUnit 5
 
-## 🚀 Tecnologias
+## Estratégia de execução
 
-- ☕ **Java 17**
-- 🍃 **Spring Boot 3.2.0**
-- 🗄️ **MySQL 8.0+**
-- 📊 **Spring Data JPA**
-- 🔄 **Jakarta Persistence (JPA 3.0+)**
-- 🎯 **Lombok** - Redução de boilerplate
-- 🏊 **HikariCP** - Pool de conexões
-- 📖 **SpringDoc OpenAPI** - Documentação da API
-- 🧪 **JUnit 5** - Testes
+O projeto está configurado para rodar como `jar` executável com Tomcat embutido.
 
----
-
-## 📋 Pré-requisitos
-
-- Java 17 ou superior
-- Maven 3.8+
-- MySQL 8.0+
-- Git
-
----
-
-## 🔧 Instalação
-
-### 1. Clonar o repositório
+Fluxo recomendado:
 
 ```bash
-git clone https://github.com/julioizidoro/deskinstaller.git
-cd deskinstaller
+mvn clean package
+java -jar target/deskinstaller-api-1.0.0-SNAPSHOT.jar
 ```
 
-### 2. Configurar o Banco de Dados
-
-```bash
-# Executar script SQL de configuração
-mysql -u root -p < setup-database.sql
-```
-
-Ou manualmente:
-
-```sql
-CREATE DATABASE dk_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'julioizidoro'@'localhost' IDENTIFIED BY 'sua_senha';
-GRANT ALL PRIVILEGES ON dk_db.* TO 'julioizidoro'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-### 3. Configurar application.properties
-
-Edite `src/main/resources/application.properties` se necessário:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/dk_db
-spring.datasource.username=julioizidoro
-spring.datasource.password=sua_senha
-```
-
-### 4. Compilar o projeto
-
-```bash
-mvn clean package -DskipTests
-```
-
-### 5. Executar a aplicação
+Durante desenvolvimento:
 
 ```bash
 mvn spring-boot:run
 ```
 
-Ou:
+No perfil `dev`, o Flyway fica desligado por padrão para evitar falhas locais com versões mais novas do MySQL.
+
+## Configuração local
+
+O repositório não versiona segredos. O fluxo mais simples em desenvolvimento é usar um arquivo `.env` na raiz do projeto. O Spring Boot está configurado para importar esse arquivo automaticamente.
+
+Passos recomendados:
 
 ```bash
-java -jar target/DeskInstaller-1.0-SNAPSHOT.jar
+cp .env.example .env
 ```
 
----
+Depois edite o `.env` com seu usuário e senha do MySQL.
 
-## 🌐 Endpoints da API
+Subida local com Maven:
 
-### Base URL
+```bash
+mvn spring-boot:run
 ```
-http://localhost:8080
+
+Ou com o script do projeto:
+
+```bash
+./start.sh
 ```
+
+Exemplo de `.env`:
+
+```env
+SPRING_PROFILES_ACTIVE=dev
+DB_URL=jdbc:mysql://localhost:3306/dk_db?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
+DB_DRIVER=com.mysql.cj.jdbc.Driver
+DB_USERNAME=seu_usuario
+DB_PASSWORD=sua_senha
+JPA_DDL_AUTO=update
+APP_SECURITY_ENABLED=true
+APP_SECURITY_PUBLIC_DOCS_ENABLED=true
+APP_SECURITY_JWT_SECRET=ZGVza2luc3RhbGxlci1kZXYtamF3dC1zZWNyZXQtdmVyeS1sb25nLTEyMzQ1Njc4OTA=
+APP_SECURITY_JWT_EXPIRATION_SECONDS=3600
+APP_SECURITY_REFRESH_TOKEN_EXPIRATION_SECONDS=604800
+```
+
+Observações:
+
+- `.env` fica ignorado no Git
+- `.env.example` pode ser versionado com valores de exemplo
+- em produção, continue usando variáveis de ambiente reais da plataforma, não um `.env` copiado do desenvolvimento
+- em `prod`, a aplicação agora exige segurança habilitada, ao menos um usuário no banco e docs públicas desabilitadas
+
+Exemplo com variáveis de ambiente:
+
+```bash
+export DB_URL='jdbc:mysql://localhost:3306/dk_db?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true'
+export DB_DRIVER='com.mysql.cj.jdbc.Driver'
+export DB_USERNAME='seu_usuario'
+export DB_PASSWORD='sua_senha'
+export JPA_DDL_AUTO='update'
+export APP_CORS_ALLOWED_ORIGINS='http://localhost:3000,http://localhost:4200,http://localhost:5173'
+export SPRING_PROFILES_ACTIVE='dev'
+```
+
+Se preferir não usar `.env`, também funciona exportar as variáveis diretamente no terminal:
+
+```bash
+export DB_URL='jdbc:mysql://localhost:3306/dk_db?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true'
+export DB_DRIVER='com.mysql.cj.jdbc.Driver'
+export DB_USERNAME='seu_usuario'
+export DB_PASSWORD='sua_senha'
+export JPA_DDL_AUTO='update'
+export APP_CORS_ALLOWED_ORIGINS='http://localhost:3000,http://localhost:4200,http://localhost:5173'
+export SPRING_PROFILES_ACTIVE='dev'
+```
+
+Outra opção é criar `src/main/resources/application-local.properties` a partir do arquivo de exemplo:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/dk_db?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+spring.datasource.username=seu_usuario
+spring.datasource.password=sua_senha
+spring.jpa.hibernate.ddl-auto=update
+app.database.monitoring.enabled=false
+```
+
+## Perfis
+
+- `dev`: `ddl-auto=update`, monitoramento de banco habilitado, SQL visível e Flyway desligado por padrão
+- `prod`: `ddl-auto=validate`, monitoramento desligado, Flyway ligado
+- `test`: H2 em memória, segurança desligada, Flyway desligado
+
+Exemplo:
+
+```bash
+SPRING_PROFILES_ACTIVE=dev mvn spring-boot:run
+```
+
+## Segurança
+
+Com `app.security.enabled=true`, a API exige autenticação via JWT Bearer.
+
+Os usuários ficam persistidos no banco. `APP_SECURITY_USERNAME` e `APP_SECURITY_PASSWORD` não são mais usados para sincronizar um admin na subida da aplicação.
+
+Fluxo:
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"SEU_USUARIO_DO_BANCO","password":"SUA_SENHA"}'
+```
+
+Depois use o token retornado:
+
+```bash
+curl http://localhost:8080/api/clientes \
+  -H "Authorization: Bearer SEU_TOKEN"
+```
+
+Para renovar a sessão com rotação de refresh token:
+
+```bash
+curl -X POST http://localhost:8080/api/auth/refresh \
+  -H 'Content-Type: application/json' \
+  -d '{"refreshToken":"SEU_REFRESH_TOKEN"}'
+```
+
+Para encerrar a sessão:
+
+```bash
+curl -X POST http://localhost:8080/api/auth/logout \
+  -H 'Content-Type: application/json' \
+  -d '{"refreshToken":"SEU_REFRESH_TOKEN"}'
+```
+
+Endpoints públicos:
+
+- `/`
+- `/api/auth/login`
+- `/swagger-ui/**`
+- `/v3/api-docs/**`
+
+Em `prod`, a recomendação é manter:
+
+```bash
+export APP_SECURITY_PUBLIC_DOCS_ENABLED='false'
+```
+
+Também defina um segredo JWT próprio e forte:
+
+```bash
+export APP_SECURITY_JWT_SECRET='seu-segredo-base64-bem-longo'
+```
+
+## Endpoints principais
 
 ### Clientes
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/clientes` | Lista todos os clientes |
-| GET | `/api/clientes/{id}` | Busca cliente por ID |
-| GET | `/api/clientes/buscar/nome?q=` | Busca por nome |
-| GET | `/api/clientes/buscar/email?email=` | Busca por email |
-| GET | `/api/clientes/buscar/telefone?telefone=` | Busca por telefone |
-| POST | `/api/clientes` | Cria novo cliente |
-| PUT | `/api/clientes/{id}` | Atualiza cliente |
-| DELETE | `/api/clientes/{id}` | Remove cliente |
-| GET | `/api/clientes/count` | Conta total |
+- `GET /api/clientes`
+- `GET /api/clientes/{id}`
+- `POST /api/clientes`
+- `PUT /api/clientes/{id}`
+- `DELETE /api/clientes/{id}`
+- `GET /api/clientes/buscar/nome?q=...`
+- `GET /api/clientes/buscar/email?email=...`
+- `GET /api/clientes/buscar/telefone?telefone=...`
 
-### Monitoramento de Banco de Dados
+Compatibilidade legada:
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/database/status` | Status da conexão |
-| GET | `/api/database/pool` | Info do pool de conexões |
-| GET | `/api/database/test` | Testa conexão |
-| GET | `/api/database/tables` | Lista tabelas |
+- `POST /api/clientes/salvar`
 
-### Documentação
+### Ordens de serviço
 
-```
-http://localhost:8080/swagger-ui.html
-http://localhost:8080/v3/api-docs
-```
+- `GET /api/ordens-servico`
+- `GET /api/ordens-servico/{id}`
+- `POST /api/ordens-servico`
+- `PUT /api/ordens-servico/{id}`
+- `PATCH /api/ordens-servico/{id}/finalizar`
+- `PATCH /api/ordens-servico/{id}/cancelar`
+- `DELETE /api/ordens-servico/{id}`
+- `GET /api/ordens-servico/ativas`
+- `GET /api/ordens-servico/{id}/pdf`
 
----
+Compatibilidade legada:
 
-## 📊 Modelo de Dados
+- `POST /api/ordemservico/salvar`
+- `GET /api/ordemservico/...`
 
-### Principais Entidades
+### Financeiro da OS
 
-- **Cliente** - Cadastro de clientes
-- **Funcionario** - Endereços dos clientes
-- **Funcionario** - Funcionários da empresa
-- **Ordemservico** - Ordens de serviço
-- **Orcamento** - Orçamentos
-- **Apcliente** - Aparelhos dos clientes
-- **Loja** - Lojas da empresa
-- **Vendedor** - Vendedores
-- **Banco** - Dados bancários
-- **Contaspagar** - Contas a pagar
-- E mais 16 entidades...
+- `GET /api/os/financeiro/os/{id}`
+- `GET /api/os/financeiro/{id}`
+- `POST /api/os/financeiro`
+- `PUT /api/os/financeiro/{id}`
+- `DELETE /api/os/financeiro/{id}`
 
-**Total:** 26+ entidades JPA
+Compatibilidade legada:
 
----
+- `GET /api/osfinanceiro/os/{id}`
+- `GET /api/osfinanceiro/{id}`
+- `POST /api/osfinanceiro`
+- `POST /api/osfinanceiro/salvar`
+- `DELETE /api/osfinanceiro/deletar/{id}`
 
-## 🧪 Testes
+## Observabilidade e exposição operacional
+
+Os endpoints de monitoramento de banco ficam desabilitados por padrão:
+
+- `GET /api/database/status`
+- `GET /api/database/pool`
+- `GET /api/database/test`
+- `GET /api/database/tables`
+
+Para habilitar localmente:
 
 ```bash
-# Executar testes
+export APP_DATABASE_MONITORING_ENABLED=true
+```
+
+## Flyway
+
+O projeto passou a incluir Flyway para migrações incrementais. As migrations atuais cobrem:
+
+- coluna `rgie` em `cliente`
+- tabelas de segurança `usuario`, `role` e `usuario_role`
+- tabela `refresh_token`
+- tabelas operacionais centrais do domínio: `cliente`, `endereco`, `funcionario`, `servico`, `apcliente`, `ordemservico`, `relservico`, `obstecnico`, `osFuncionario` e `osfinanceiro`
+
+Para rodar com Flyway:
+
+```bash
+export FLYWAY_ENABLED=true
+```
+
+Observação:
+
+- em `prod`, a recomendação é usar `SPRING_PROFILES_ACTIVE=prod`
+- o Flyway agora já cobre a base central necessária para subir ambientes novos da API; tabelas periféricas ainda podem exigir migrations adicionais conforme forem sendo ativadas no sistema
+
+## Testes
+
+Os testes usam H2 em memória:
+
+```bash
 mvn test
-
-# Testes de integração
-mvn verify
-
-# Com cobertura
-mvn clean test jacoco:report
 ```
 
----
+Hoje a suíte cobre:
 
-## 📁 Estrutura do Projeto
+- fluxo CRUD real de clientes
+- autenticação obrigatória quando a segurança está ativa
+- filtro de aparelhos por cliente e endereço
+- validação de email duplicado
+- regra de filtro de ordens por `datasituacao`
+- fluxo encadeado cliente -> endereço -> aparelho -> ordem -> serviço -> PDF
+- testes web dos controllers principais
 
-```
-src/
-├── main/
-│   ├── java/br/com/deskinstaller/
-│   │   ├── DeskInstallerApplication.java
-│   │   ├── config/
-│   │   │   ├── DatabaseConfig.java
-│   │   │   └── DatabaseConnectionValidator.java
-│   │   ├── controller/
-│   │   │   ├── ClienteController.java
-│   │   │   └── DatabaseMonitorController.java
-│   │   ├── dto/
-│   │   │   └── ClienteDTO.java
-│   │   ├── model/
-│   │   │   ├── Cliente.java
-│   │   │   └── ... (26 entidades)
-│   │   ├── repository/
-│   │   │   └── ClienteRepository.java
-│   │   └── service/
-│   │       └── ClienteService.java
-│   └── resources/
-│       ├── application.properties
-│       └── logback-spring.xml
-└── test/
-    └── java/
-        └── ...
-```
+## Notas de manutenção
 
----
+- `rgie` agora é persistido na entidade `Cliente`
+- o filtro de ordens “ativas ou atualizadas nos últimos 7 dias” usa `datasituacao`
+- a API começou a migrar para contratos mais RESTful, mantendo algumas rotas legadas por compatibilidade
+- a segurança agora é centralizada via Spring Security
+- o login JWT agora autentica contra usuários persistidos no banco
+- na subida com segurança habilitada, o sistema sincroniza o usuário admin do `.env` no banco
+- os papéis base são `ADMIN`, `ATENDENTE`, `TECNICO` e `FINANCEIRO`
+- o projeto tem perfis `dev` e `prod`, além de suporte inicial a Flyway
 
-## 🔒 Segurança
+## Arquivos úteis
 
-⚠️ **Importante:** Não commite senhas no repositório!
-
-Use variáveis de ambiente:
-
-```bash
-export DB_PASSWORD='sua_senha_aqui'
-mvn spring-boot:run
-```
-
-Ou crie `application-local.properties` (já ignorado pelo .gitignore):
-
-```properties
-spring.datasource.password=${DB_PASSWORD}
-```
-
----
-
-## 📖 Documentação Adicional
-
-- [CONFIG-MYSQL.md](CONFIG-MYSQL.md) - Configuração detalhada do MySQL
-- [API-CLIENTES.md](API-CLIENTES.md) - Documentação completa da API de Clientes
-- [MIGRACAO-JPA.md](MIGRACAO-JPA.md) - Guia de migração Jakarta Persistence
-
----
-
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/NovaFuncionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
-5. Abra um Pull Request
-
----
-
-## 📝 Roadmap
-
-- [ ] Implementar autenticação JWT
-- [ ] Adicionar cache com Redis
-- [ ] Criar dashboard administrativo
-- [ ] Implementar notificações em tempo real
-- [ ] Deploy em Docker/Kubernetes
-- [ ] CI/CD com GitHub Actions
-
----
-
-## 👨‍💻 Autor
-
-**Julio Izidoro**
-
-- GitHub: [@julioizidoro](https://github.com/julioizidoro)
-- LinkedIn: [Julio Izidoro](https://linkedin.com/in/julioizidoro)
-
----
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-
-## 🙏 Agradecimentos
-
-- Spring Team pela excelente framework
-- Comunidade open-source
-- Todos os contribuidores
-
----
-
-**Desenvolvido com ❤️ usando Spring Boot 3 + MySQL + Lombok**
-
-**Data:** 13 de Novembro de 2025
-
-# deskInstaller-api
-
-Rápido esqueleto em TypeScript + Express.
-
-Comandos:
-- npm install
-- npm run dev   # desenvolvimento
-- npm run build && npm start  # produção
-
+- [CONFIG-MYSQL.md](CONFIG-MYSQL.md)
+- [MIGRACAO-JPA.md](MIGRACAO-JPA.md)
+- [PDF-GENERATOR-README.md](PDF-GENERATOR-README.md)
+- [OSPDF-SERVICE-README.md](OSPDF-SERVICE-README.md)

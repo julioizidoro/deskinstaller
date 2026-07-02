@@ -2,6 +2,8 @@ package br.com.deskinstaller.controller;
 
 import br.com.deskinstaller.dto.OrdemServicoDTO;
 import br.com.deskinstaller.dto.OsDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import br.com.deskinstaller.service.OrdemservicoService;
 import br.com.deskinstaller.service.OsPDFService;
 import br.com.deskinstaller.service.PdfGeneratorService;
@@ -9,14 +11,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.thymeleaf.context.Context;
 
 import java.util.List;
-import java.util.Optional;
-
 @RestController
-@RequestMapping("/api/ordemservico")
+@RequestMapping({"/api/ordens-servico", "/api/ordemservico"})
 @RequiredArgsConstructor
 @Slf4j
 public class OrdemServicoController {
@@ -32,8 +31,9 @@ public class OrdemServicoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<OrdemServicoDTO> buscarPorId(@PathVariable Integer id) {
-        Optional<OrdemServicoDTO> dto = ordemservicoService.buscarPorId(id);
-        return dto.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return ordemservicoService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Ordem de serviço não encontrada com ID: " + id));
     }
 
     @GetMapping("/ativas")
@@ -41,10 +41,31 @@ public class OrdemServicoController {
         return ResponseEntity.ok(ordemservicoService.listarSituacaoNaoCanceladaOuFinalizadaUltimos7Dias());
     }
 
-    @PostMapping("/salvar")
-    public ResponseEntity<OrdemServicoDTO> salvar(@RequestBody OrdemServicoDTO dto) {
+    @PostMapping
+    public ResponseEntity<OrdemServicoDTO> salvar(@Valid @RequestBody OrdemServicoDTO dto) {
         OrdemServicoDTO salvo = ordemservicoService.salvar(dto);
-        return ResponseEntity.ok(salvo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    }
+
+    @PostMapping("/salvar")
+    public ResponseEntity<OrdemServicoDTO> salvarLegado(@Valid @RequestBody OrdemServicoDTO dto) {
+        return salvar(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<OrdemServicoDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody OrdemServicoDTO dto) {
+        dto.setIdordemServico(id);
+        return ResponseEntity.ok(ordemservicoService.salvar(dto));
+    }
+
+    @PatchMapping("/{id}/finalizar")
+    public ResponseEntity<OrdemServicoDTO> finalizar(@PathVariable Integer id) {
+        return ResponseEntity.ok(ordemservicoService.finalizar(id));
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<OrdemServicoDTO> cancelar(@PathVariable Integer id) {
+        return ResponseEntity.ok(ordemservicoService.cancelar(id));
     }
 
     @DeleteMapping("/{id}")
@@ -60,48 +81,26 @@ public class OrdemServicoController {
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> gerarPDF(@PathVariable Integer id) {
         log.info("Gerando PDF da OS - ID: {}", id);
+        OsDTO osDTO = osPDFService.buscarOsParaVisualizacao(id);
 
-        try {
-            // 1. Buscar dados da OS
-            OsDTO osDTO = osPDFService.buscarOsParaVisualizacao(id);
+        Context context = new Context();
+        context.setVariable("os", osDTO);
 
-            // 2. Preparar contexto para o template
-            Context context = new Context();
-            context.setVariable("os", osDTO);
+        byte[] pdfBytes = pdfGeneratorService.gerarPdfDeTemplate("OsHTML", context);
 
-            // 3. Gerar PDF
-            byte[] pdfBytes = pdfGeneratorService.gerarPdfDeTemplate("OsHTML", context);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("OS-" + id + ".pdf")
+                        .build()
+        );
+        headers.setContentLength(pdfBytes.length);
 
-            // 4. Preparar headers para download
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(
-                    ContentDisposition.attachment()
-                            .filename("OS-" + id + ".pdf")
-                            .build()
-            );
-            headers.setContentLength(pdfBytes.length);
+        log.info("PDF gerado com sucesso para OS {}", id);
 
-            log.info("PDF gerado com sucesso para OS {}, tamanho: {} bytes", id, pdfBytes.length);
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfBytes);
-
-        } catch (ResponseStatusException ex) {
-            // Já é uma exceção com status HTTP — repassa diretamente
-            log.warn("ResponseStatusException ao gerar PDF da OS {}: {}", id, ex.getReason());
-            throw ex;
-        } catch (RuntimeException e) {
-            // Diferenciar NotFound de outros erros
-            String msg = e.getMessage() != null ? e.getMessage() : "";
-            if (msg.contains("Ordem de Serviço não encontrada") || msg.toLowerCase().contains("not found") || msg.toLowerCase().contains("não encontrada")) {
-                log.warn("OS não encontrada ({}) ao tentar gerar PDF: {}", id, msg);
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordem de Serviço não encontrada: " + id, e);
-            }
-
-            log.error("Erro inesperado ao gerar PDF da OS {}: {}", id, e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao gerar PDF da Ordem de Serviço: " + e.getMessage(), e);
-        }
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 }

@@ -1,5 +1,6 @@
 package br.com.deskinstaller.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,10 +17,11 @@ import java.io.Serializable;
 @Builder
 public class FuncionarioDTO implements Serializable {
     private Integer idfuncionario;
+
+    @NotBlank(message = "nome é obrigatório")
     private String nome;
     private String foneCelular;
     private Float valorComissao;
     private String funcao;
     private Boolean ativo;
 }
-

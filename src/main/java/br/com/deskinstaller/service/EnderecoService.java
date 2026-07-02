@@ -1,6 +1,7 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.EnderecoDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.Endereco;
 import br.com.deskinstaller.repository.EnderecoRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class EnderecoService {
 
     private final EnderecoRepository enderecoRepository;
+    private final DomainValidationService domainValidationService;
 
     /**
      * Salva ou atualiza um Endereco a partir do DTO
@@ -32,8 +34,12 @@ public class EnderecoService {
     @Transactional
     public EnderecoDTO salvar(EnderecoDTO dto) {
         log.info("Salvando Endereco: {}", dto.getLogradouro());
-        Endereco Endereco = converterParaEntidade(dto);
-        Endereco salvo = enderecoRepository.save(Endereco);
+        if (dto.getIdendereco() != null && !enderecoRepository.existsById(dto.getIdendereco())) {
+            throw new ResourceNotFoundException("Endereco não encontrado com ID: " + dto.getIdendereco());
+        }
+        domainValidationService.requireCliente(dto.getCliente());
+        Endereco endereco = converterParaEntidade(dto);
+        Endereco salvo = enderecoRepository.save(endereco);
         log.info("Endereco salvo com sucesso. ID: {}", salvo.getIdendereco());
         return converterParaDTO(salvo);
     }
@@ -53,7 +59,7 @@ public class EnderecoService {
     @Transactional
     public void deletar(Integer id) {
         if (!enderecoRepository.existsById(id)) {
-            throw new RuntimeException("Endereco não encontrado com ID: " + id);
+            throw new ResourceNotFoundException("Endereco não encontrado com ID: " + id);
         }
         enderecoRepository.deleteById(id);
         log.info("Endereco deletado. ID: {}", id);
@@ -61,9 +67,7 @@ public class EnderecoService {
 
     @Transactional(readOnly = true)
     public List<EnderecoDTO> listarPorCliente(Integer clienteId) {
-        System.out.println(clienteId);
         List<Endereco> enderecos = enderecoRepository.findByCliente(clienteId);
-        System.out.println(enderecos);
         return enderecos.stream().map(this::converterParaDTO).collect(Collectors.toList());
     }
 

@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -27,13 +28,21 @@ public class DatabaseConnectionValidator {
 
     private final DataSource dataSource;
 
+    @Value("${app.database.validation.enabled:true}")
+    private boolean validationEnabled;
+
     /**
      * Valida a conexão com o banco após a aplicação iniciar
      */
     @EventListener(ApplicationReadyEvent.class)
     public void validateDatabaseConnection() {
+        if (!validationEnabled) {
+            log.info("Validação de conexão com banco desabilitada por configuração.");
+            return;
+        }
+
         log.info("═══════════════════════════════════════════════════════");
-        log.info("    VALIDANDO CONEXÃO COM BANCO DE DADOS MYSQL");
+        log.info("    VALIDANDO CONEXÃO COM BANCO DE DADOS");
         log.info("═══════════════════════════════════════════════════════");
 
         try (Connection connection = dataSource.getConnection()) {
@@ -199,4 +208,3 @@ public class DatabaseConnectionValidator {
         return "DataSource type: " + dataSource.getClass().getName();
     }
 }
-

@@ -2,6 +2,7 @@ package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.OsFuncionarioDTO;
 import br.com.deskinstaller.dto.FuncionarioDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.OsFuncionario;
 import br.com.deskinstaller.model.Funcionario;
 import br.com.deskinstaller.repository.OsFuncionarioRepository;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class OsFuncionarioService {
 
     private final OsFuncionarioRepository osFuncionarioRepository;
+    private final DomainValidationService domainValidationService;
 
     /**
      * Busca funcionários por id da ordem de serviço
@@ -43,6 +45,11 @@ public class OsFuncionarioService {
     @Transactional
     public OsFuncionarioDTO salvar(OsFuncionarioDTO dto) {
         log.info("Salvando OsFuncionario: {}", dto.getIdosFuncionario());
+        if (dto.getIdosFuncionario() != null && !osFuncionarioRepository.existsById(dto.getIdosFuncionario())) {
+            throw new ResourceNotFoundException("OsFuncionario não encontrado com ID: " + dto.getIdosFuncionario());
+        }
+        domainValidationService.requireOrdemServico(dto.getOrdemServico());
+        domainValidationService.requireFuncionario(dto.getFuncionario().getIdfuncionario());
         OsFuncionario entidade = converterParaEntidade(dto);
         OsFuncionario salvo = osFuncionarioRepository.save(entidade);
         log.info("OsFuncionario salvo com sucesso. ID: {}", salvo.getIdosFuncionario());
@@ -56,7 +63,7 @@ public class OsFuncionarioService {
     public void deletar(Integer id) {
         log.info("Deletando OsFuncionario ID: {}", id);
         if (!osFuncionarioRepository.existsById(id)) {
-            throw new RuntimeException("OsFuncionario não encontrado com ID: " + id);
+            throw new ResourceNotFoundException("OsFuncionario não encontrado com ID: " + id);
         }
         osFuncionarioRepository.deleteById(id);
         log.info("OsFuncionario deletado com sucesso");
@@ -89,18 +96,7 @@ public class OsFuncionarioService {
         entidade.setIdosFuncionario(dto.getIdosFuncionario());
         entidade.setOrdemServico(dto.getOrdemServico());
         if (dto.getFuncionario() != null) {
-            // cria uma entidade Funcionario mínima a partir do DTO (normalmente só o ID é necessário)
-            FuncionarioDTO fdto = dto.getFuncionario();
-            Funcionario f = new Funcionario();
-            f.setIdfuncionario(fdto.getIdfuncionario());
-            // preenche outros campos quando disponíveis
-            f.setNome(fdto.getNome());
-            f.setFoneCelular(fdto.getFoneCelular());
-            f.setValorComissao(fdto.getValorComissao());
-            f.setFuncao(fdto.getFuncao());
-            // converte Boolean -> boolean (default false quando nulo)
-            f.setAtivo(fdto.getAtivo() != null ? fdto.getAtivo() : false);
-            entidade.setFuncionario(f);
+            entidade.setFuncionario(domainValidationService.requireFuncionario(dto.getFuncionario().getIdfuncionario()));
         }
         return entidade;
     }

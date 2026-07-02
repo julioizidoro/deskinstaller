@@ -58,6 +58,6 @@ public class Cliente implements Serializable {
     @Column(name = "cpfcnpj")
     private String cpfcnpj;
 
-    @Transient
+    @Column(name = "rgie")
     private String rgie;
 }

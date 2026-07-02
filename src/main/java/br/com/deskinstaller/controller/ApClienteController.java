@@ -1,6 +1,8 @@
 package br.com.deskinstaller.controller;
 
 import br.com.deskinstaller.dto.ApclienteDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import br.com.deskinstaller.service.ApClienteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/aparelhos")
@@ -37,51 +37,39 @@ public class ApClienteController {
 
     @GetMapping("/cliente/{clienteId}/endereco/{enderecoId}")
     public ResponseEntity<List<ApclienteDTO>> listarPorClienteEndereco(@PathVariable Integer clienteId, @PathVariable Integer enderecoId) {
-        log.info("GET /api/aparelhos/cliente/{}/endereoc - listarPorClienteEndereco", clienteId + " - " + enderecoId);
-        return ResponseEntity.ok(apClienteService.listarPorCliente(clienteId));
+        log.info("GET /api/aparelhos/cliente/{}/endereco/{} - listarPorClienteEndereco", clienteId, enderecoId);
+        return ResponseEntity.ok(apClienteService.listarPorClienteEndereco(clienteId, enderecoId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ApclienteDTO> buscarPorId(@PathVariable Integer id) {
         log.info("GET /api/aparelhos/{} - buscarPorId", id);
         return apClienteService.buscarPorId(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro("Apcliente não encontrado com ID: " + id)));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Apcliente não encontrado com ID: " + id));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApclienteDTO> salvar(@Valid @RequestBody ApclienteDTO dto) {
+        log.info("POST /api/aparelhos - salvar: {}", dto);
+        ApclienteDTO salvo = apClienteService.salvar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<?> salvar(@RequestBody ApclienteDTO dto) {
-        try {
-            log.info("POST /api/aparelhos/salvar - salvar: {}", dto);
-            ApclienteDTO salvo = apClienteService.salvar(dto);
-            HttpStatus status = (dto.getIdapCliente() == null) ? HttpStatus.CREATED : HttpStatus.OK;
-            return ResponseEntity.status(status).body(salvo);
-        } catch (RuntimeException e) {
-            log.error("Erro ao salvar aparelho", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(criarErro(e.getMessage()));
-        }
+    public ResponseEntity<ApclienteDTO> salvarLegado(@Valid @RequestBody ApclienteDTO dto) {
+        return salvar(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApclienteDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody ApclienteDTO dto) {
+        dto.setIdapCliente(id);
+        return ResponseEntity.ok(apClienteService.salvar(dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Integer id) {
-        try {
-            apClienteService.deletar(id);
-            return ResponseEntity.ok(criarMensagem("Apcliente deletado com sucesso"));
-        } catch (RuntimeException e) {
-            log.error("Erro ao deletar aparelhos", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro(e.getMessage()));
-        }
-    }
-
-    private Map<String, Object> criarErro(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("erro", msg);
-        return m;
-    }
-
-    private Map<String, Object> criarMensagem(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("mensagem", msg);
-        return m;
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        apClienteService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }
