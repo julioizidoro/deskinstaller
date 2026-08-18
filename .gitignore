@@ -116,3 +116,6 @@ application-dev.properties
 /target/
 node_modules
 dist
+
+# Arquivos marcados para remocao manual pelo autor
+_to_delete/

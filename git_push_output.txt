@@ -1,3 +1,0 @@
-To https://github.com/julioizidoro/deskinstaller.git
-=	refs/heads/feature/cadastro-aparelhos:refs/heads/feature/cadastro-aparelhos	[up to date]
-Done
