@@ -36,6 +36,9 @@ public class Servico implements Serializable {
     @Basic(optional = false)
     @Column(name = "descricao")
     private String descricao;
+    @Basic(optional = false)
+    @Column(name = "situacao")
+    private boolean situacao;
 
 
 }

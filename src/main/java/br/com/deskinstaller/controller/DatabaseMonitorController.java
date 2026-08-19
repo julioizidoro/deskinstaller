@@ -3,6 +3,7 @@ package br.com.deskinstaller.controller;
 import br.com.deskinstaller.config.DatabaseConnectionValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,7 @@ import java.util.Map;
 @RequestMapping("/api/database")
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "app.database.monitoring.enabled", havingValue = "true")
 public class DatabaseMonitorController {
 
     private final DataSource dataSource;
@@ -145,4 +147,3 @@ public class DatabaseMonitorController {
         return url.replaceAll("password=[^&;]*", "password=****");
     }
 }
-

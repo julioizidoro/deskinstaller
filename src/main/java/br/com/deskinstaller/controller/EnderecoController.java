@@ -1,6 +1,8 @@
 package br.com.deskinstaller.controller;
 
 import br.com.deskinstaller.dto.EnderecoDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import br.com.deskinstaller.service.EnderecoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
 @RestController
 @RequestMapping("/api/enderecos")
 @RequiredArgsConstructor
@@ -26,44 +25,33 @@ public class EnderecoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<EnderecoDTO> buscarPorId(@PathVariable Integer id) {
         return enderecoService.buscarPorId(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro("Endereco não encontrado")));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Endereco não encontrado com ID: " + id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Integer id) {
-        try {
-            enderecoService.deletar(id);
-            return ResponseEntity.ok(criarMensagem("Endereco deletado com sucesso"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro(e.getMessage()));
-        }
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        enderecoService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping
+    public ResponseEntity<EnderecoDTO> salvar(@Valid @RequestBody EnderecoDTO enderecoDTO) {
+        log.info("Recebido EnderecoDTO: {}", enderecoDTO);
+        EnderecoDTO salvo = enderecoService.salvar(enderecoDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<?> salvar(@RequestBody EnderecoDTO enderecoDTO) {
-        try {
-            log.info("Recebido EnderecoDTO: {}", enderecoDTO);
-            EnderecoDTO salvo = enderecoService.salvar(enderecoDTO);
-            return ResponseEntity.status(enderecoDTO.getIdendereco() == null ? HttpStatus.CREATED : HttpStatus.OK)
-                    .body(salvo);
-        } catch (RuntimeException e) {
-            log.error("Erro ao salvar Endereco", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(criarErro(e.getMessage()));
-        }
+    public ResponseEntity<EnderecoDTO> salvarLegado(@Valid @RequestBody EnderecoDTO enderecoDTO) {
+        return salvar(enderecoDTO);
     }
 
-    private Map<String, Object> criarErro(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("erro", msg);
-        return m;
-    }
-
-    private Map<String, Object> criarMensagem(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("mensagem", msg);
-        return m;
+    @PutMapping("/{id}")
+    public ResponseEntity<EnderecoDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody EnderecoDTO enderecoDTO) {
+        enderecoDTO.setIdendereco(id);
+        return ResponseEntity.ok(enderecoService.salvar(enderecoDTO));
     }
 }

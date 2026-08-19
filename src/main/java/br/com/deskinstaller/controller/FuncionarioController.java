@@ -1,6 +1,8 @@
 package br.com.deskinstaller.controller;
 
 import br.com.deskinstaller.dto.FuncionarioDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import br.com.deskinstaller.service.FuncionarioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/funcionarios")
@@ -27,47 +27,34 @@ public class FuncionarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<FuncionarioDTO> buscarPorId(@PathVariable Integer id) {
         log.info("GET /api/funcionarios/{} - Buscar funcionario por ID", id);
         return funcionarioService.buscarPorId(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(criarErro("Funcionario não encontrado com ID: " + id)));
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Funcionario não encontrado com ID: " + id));
+    }
+
+    @PostMapping
+    public ResponseEntity<FuncionarioDTO> salvar(@Valid @RequestBody FuncionarioDTO dto) {
+        log.info("POST /api/funcionarios - Salvar funcionario: {}", dto);
+        FuncionarioDTO salvo = funcionarioService.salvar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<?> salvar(@RequestBody FuncionarioDTO dto) {
-        try {
-            log.info("POST /api/funcionarios/salvar - Salvar funcionario: {}", dto);
-            FuncionarioDTO salvo = funcionarioService.salvar(dto);
-            HttpStatus status = (dto.getIdfuncionario() == null) ? HttpStatus.CREATED : HttpStatus.OK;
-            return ResponseEntity.status(status).body(salvo);
-        } catch (RuntimeException e) {
-            log.error("Erro ao salvar funcionario", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(criarErro(e.getMessage()));
-        }
+    public ResponseEntity<FuncionarioDTO> salvarLegado(@Valid @RequestBody FuncionarioDTO dto) {
+        return salvar(dto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FuncionarioDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody FuncionarioDTO dto) {
+        dto.setIdfuncionario(id);
+        return ResponseEntity.ok(funcionarioService.salvar(dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Integer id) {
-        try {
-            funcionarioService.deletar(id);
-            return ResponseEntity.ok(criarMensagem("Funcionario deletado com sucesso"));
-        } catch (RuntimeException e) {
-            log.error("Erro ao deletar funcionario", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(criarErro(e.getMessage()));
-        }
-    }
-
-    private Map<String, Object> criarErro(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("erro", msg);
-        return m;
-    }
-
-    private Map<String, Object> criarMensagem(String msg) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("mensagem", msg);
-        return m;
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        funcionarioService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

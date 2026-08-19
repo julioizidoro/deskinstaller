@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "cliente")
+@Access(AccessType.FIELD)
 public class Cliente implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -60,4 +61,3 @@ public class Cliente implements Serializable {
     @Column(name = "rgie")
     private String rgie;
 }
-

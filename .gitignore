@@ -96,6 +96,9 @@ spring-boot.log
 application-local.properties
 application-dev.properties
 *.env
+.env
+.env.*
+!.env.example
 
 # Database
 *.db
@@ -113,4 +116,6 @@ application-dev.properties
 /target/
 node_modules
 dist
-.env
+
+# Arquivos marcados para remocao manual pelo autor
+_to_delete/

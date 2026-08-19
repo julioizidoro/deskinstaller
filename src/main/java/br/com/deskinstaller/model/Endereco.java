@@ -61,3 +61,4 @@ public class Endereco implements Serializable {
     @Column(name = "cliente_idcliente")
     private Integer cliente;
 }
+

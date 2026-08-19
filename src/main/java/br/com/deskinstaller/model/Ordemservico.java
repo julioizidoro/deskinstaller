@@ -7,13 +7,13 @@ package br.com.deskinstaller.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 
 /**
  *
@@ -41,27 +41,41 @@ public class Ordemservico implements Serializable {
     @Basic(optional = false)
     @Column(name = "valor")
     private double valor;
-    @Lob
+    // MySQL reporta TINYTEXT/TEXT/MEDIUMTEXT/LONGTEXT como LONGVARCHAR;
+    // fixar o tipo evita falha de schema-validation contra o banco legado.
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "observacao")
     private String observacao;
     @Column(name = "situacao")
     private String situacao;
+    @Temporal(TemporalType.DATE)
+    private Date datasituacao;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "valorComissao")
     private Double valorComissao;
-    @ManyToOne(optional = false) // ou true se o Funcionario puder ser nulo
-    @JoinColumn(name = "Funcionario_idFuncionario", referencedColumnName = "idFuncionario")
-    private Funcionario Funcionario;
 
-    @ManyToOne(optional = false) // ou true se o cliente puder ser nulo
+    // Relacionamento com Cliente: adicionar @ManyToOne para que JPA reconheça a associação
+    @ManyToOne(fetch = FetchType.EAGER, optional = true)
     @JoinColumn(name = "cliente_idcliente", referencedColumnName = "idcliente")
     private Cliente cliente;
 
-    @ManyToOne(optional = false) // ou true se o cliente puder ser nulo
-    @JoinColumn(name = "funcionario_idfuncionario", referencedColumnName = "idfuncionario")
-    private Funcionario funcionario;
+    // Relacionamento com Endereco
+    @ManyToOne(fetch = FetchType.EAGER, optional = true)
+    @JoinColumn(name = "endereco_idendereco", referencedColumnName = "idendereco")
+    private Endereco endereco;
     @Column(name = "indicacao")
     private String indicacao;
+    @Column(name = "recebida")
+    private boolean recebida;
+
+    // E-mail convidado para o evento da agenda referente a esta OS.
+    @Column(name = "email", length = 255)
+    private String email;
+
+    // Id do evento correspondente no Google Calendar; nulo quando a OS ainda
+    // nao foi sincronizada ou quando a integracao esta desligada.
+    @Column(name = "googleEventId", length = 255)
+    private String googleEventId;
 
 
 }

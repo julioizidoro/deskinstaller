@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Classe principal da aplicação DeskInstaller
  *
+ * Atualizada para suportar empacotamento como WAR e deploy em Tomcat externo.
+ *
  * @author Julio Izidoro
  * @since 2025-11-13
  */

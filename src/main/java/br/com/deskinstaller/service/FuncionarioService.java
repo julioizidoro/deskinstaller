@@ -1,6 +1,7 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.FuncionarioDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.Funcionario;
 import br.com.deskinstaller.repository.FuncionarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +34,13 @@ public class FuncionarioService {
     @Transactional
     public FuncionarioDTO salvar(FuncionarioDTO dto) {
         log.info("Salvando Funcionario: {}", dto.getNome());
-            Funcionario funcionario = converterParaEntidade(dto);
-            Funcionario salvo = funcionarioRepository.save(funcionario);
-            log.info("Funcionario salvo com sucesso. ID: {}", salvo.getIdfuncionario());
-            return converterParaDTO(salvo);
-
-
+        if (dto.getIdfuncionario() != null && !funcionarioRepository.existsById(dto.getIdfuncionario())) {
+            throw new ResourceNotFoundException("Funcionario não encontrado com ID: " + dto.getIdfuncionario());
+        }
+        Funcionario funcionario = converterParaEntidade(dto);
+        Funcionario salvo = funcionarioRepository.save(funcionario);
+        log.info("Funcionario salvo com sucesso. ID: {}", salvo.getIdfuncionario());
+        return converterParaDTO(salvo);
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +64,7 @@ public class FuncionarioService {
     @Transactional
     public void deletar(Integer id) {
         if (!funcionarioRepository.existsById(id)) {
-            throw new RuntimeException("Funcionario não encontrado com ID: " + id);
+            throw new ResourceNotFoundException("Funcionario não encontrado com ID: " + id);
         }
         funcionarioRepository.deleteById(id);
         log.info("Funcionario deletado. ID: {}", id);
@@ -78,7 +80,7 @@ public class FuncionarioService {
     }
 
     // Conversores
-    private FuncionarioDTO converterParaDTO(Funcionario e) {
+    public FuncionarioDTO converterParaDTO(Funcionario e) {
         if (e == null) return null;
         return FuncionarioDTO.builder()
                 .idfuncionario(e.getIdfuncionario())
@@ -90,14 +92,29 @@ public class FuncionarioService {
                 .build();
     }
 
-    private Funcionario converterParaEntidade(FuncionarioDTO dto) {
+    /**
+     * Resolve a flag {@code ativo} sem apagar o estado atual: quando o payload
+     * omite o campo, uma criacao nasce ativa e uma atualizacao preserva o valor
+     * que ja esta no banco.
+     */
+    private boolean resolverAtivo(Boolean informado, Integer id) {
+        if (informado != null) {
+            return informado;
+        }
+        if (id == null) {
+            return true;
+        }
+        return funcionarioRepository.findById(id).map(Funcionario::isAtivo).orElse(true);
+    }
+
+    public Funcionario converterParaEntidade(FuncionarioDTO dto) {
         Funcionario e = new Funcionario();
         e.setIdfuncionario(dto.getIdfuncionario());
         e.setNome(dto.getNome());
         e.setFoneCelular(dto.getFoneCelular());
         e.setValorComissao(dto.getValorComissao());
         e.setFuncao(dto.getFuncao());
-        e.setAtivo(dto.isAtivo());
+        e.setAtivo(resolverAtivo(dto.getAtivo(), dto.getIdfuncionario()));
         return e;
     }
 
