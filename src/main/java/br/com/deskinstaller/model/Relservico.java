@@ -6,6 +6,8 @@ package br.com.deskinstaller.model;
 
 import java.io.Serializable;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -30,7 +32,9 @@ public class Relservico implements Serializable {
     @Basic(optional = false)
     @Column(name = "idrelServico")
     private Integer idrelServico;
-    @Lob
+    // MySQL reporta TINYTEXT/TEXT/MEDIUMTEXT/LONGTEXT como LONGVARCHAR;
+    // fixar o tipo evita falha de schema-validation contra o banco legado.
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "descricao", columnDefinition = "MEDIUMTEXT")
     private String descricao;
     @Basic(optional = false)

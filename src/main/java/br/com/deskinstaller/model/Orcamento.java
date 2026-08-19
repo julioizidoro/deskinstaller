@@ -6,6 +6,8 @@ package br.com.deskinstaller.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,7 +53,9 @@ public class Orcamento implements Serializable {
     private Float valor;
     @Column(name = "formaPagamento")
     private String formaPagamento;
-    @Lob
+    // MySQL reporta TINYTEXT/TEXT/MEDIUMTEXT/LONGTEXT como LONGVARCHAR;
+    // fixar o tipo evita falha de schema-validation contra o banco legado.
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "observacao")
     private String observacao;
     @Column(name = "Funcionario_idFuncionario")

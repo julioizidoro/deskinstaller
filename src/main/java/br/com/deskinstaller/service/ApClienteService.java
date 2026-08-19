@@ -104,6 +104,21 @@ public class ApClienteService {
                 .build();
     }
 
+    /**
+     * Resolve a flag {@code ativo} sem apagar o estado atual: quando o payload
+     * omite o campo, uma criacao nasce ativa e uma atualizacao preserva o valor
+     * que ja esta no banco.
+     */
+    private boolean resolverAtivo(Boolean informado, Integer id) {
+        if (informado != null) {
+            return informado;
+        }
+        if (id == null) {
+            return true;
+        }
+        return apClienteRepository.findById(id).map(Apcliente::isAtivo).orElse(true);
+    }
+
     public Apcliente converterParaEntidade(ApclienteDTO dto) {
         Apcliente e = new Apcliente();
         e.setIdapCliente(dto.getIdapCliente());
@@ -123,7 +138,7 @@ public class ApClienteService {
         e.setNsCodensadora(dto.getNsCodensadora());
         e.setCapacidade(dto.getCapacidade());
         e.setDataultimamanutencao(dto.getDataultimamanutencao());
-        e.setAtivo(dto.getAtivo() != null ? dto.getAtivo() : false);
+        e.setAtivo(resolverAtivo(dto.getAtivo(), dto.getIdapCliente()));
         return e;
     }
 

@@ -51,4 +51,4 @@ echo "API: http://localhost:8080"
 echo "Profile: ${SPRING_PROFILES_ACTIVE:-dev}"
 echo
 
-SPRING_PROFILES_ACTIVE="${SPRING_PROFILES_ACTIVE:-dev}" java -jar target/deskinstaller-api-1.0.0-SNAPSHOT.jar
+SPRING_PROFILES_ACTIVE="${SPRING_PROFILES_ACTIVE:-dev}" java -jar target/deskinstaller-api.war

@@ -2,20 +2,18 @@ package br.com.deskinstaller.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+
+import java.time.Duration;
 
 @Configuration
 @ConditionalOnProperty(name = "app.security.enabled", havingValue = "true", matchIfMissing = true)
@@ -26,7 +24,16 @@ public class SecurityConfig {
             "/index.html",
             "/api/auth/login",
             "/api/auth/refresh",
-            "/api/auth/logout"
+            "/api/auth/logout",
+            // O navegador chega aqui redirecionado pelo Google, sem token da API.
+            // A protecao e o parametro "state" validado em GoogleOAuthService.
+            "/api/google/calendar/callback"
+    };
+
+    private static final String[] DOCS_ENDPOINTS = {
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
     };
 
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
@@ -48,12 +55,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(publicDocsEnabled
-                                ? new String[]{"/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"}
-                                : new String[]{}).permitAll()
+                        .requestMatchers(publicDocsEnabled ? DOCS_ENDPOINTS : new String[]{}).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/database/**", "/api/funcionarios/**").hasRole("ADMIN")
-                        .requestMatchers("/api/os/financeiro/**").hasAnyRole("ADMIN", "FINANCEIRO")
+                        .requestMatchers("/api/google/calendar/**").hasRole("ADMIN")
+                        // Parear/encerrar sessao e desconectar a conta sao operacoes sensiveis;
+                        // o envio de mensagens continua liberado aos demais perfis.
+                        .requestMatchers("/api/whatsapp/session/**", "/api/whatsapp/debug/**").hasRole("ADMIN")
+                        .requestMatchers("/api/os/financeiro/**", "/api/osfinanceiro/**").hasAnyRole("ADMIN", "FINANCEIRO")
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyRole("ADMIN", "ATENDENTE")
                         .requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyRole("ADMIN", "ATENDENTE", "TECNICO", "FINANCEIRO")
                         .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("ADMIN", "ATENDENTE", "TECNICO", "FINANCEIRO")
@@ -67,7 +76,11 @@ public class SecurityConfig {
                 )
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; frame-ancestors 'none'; form-action 'self'"))
-                        .referrerPolicy(referrer -> referrer.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                        .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                        .frameOptions(frame -> frame.deny())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(Duration.ofDays(365).toSeconds()))
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -77,16 +90,5 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(UserDetailsService.class)
-    UserDetailsService fallbackUserDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("change-me"))
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user);
     }
 }

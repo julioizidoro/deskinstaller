@@ -92,6 +92,21 @@ public class FuncionarioService {
                 .build();
     }
 
+    /**
+     * Resolve a flag {@code ativo} sem apagar o estado atual: quando o payload
+     * omite o campo, uma criacao nasce ativa e uma atualizacao preserva o valor
+     * que ja esta no banco.
+     */
+    private boolean resolverAtivo(Boolean informado, Integer id) {
+        if (informado != null) {
+            return informado;
+        }
+        if (id == null) {
+            return true;
+        }
+        return funcionarioRepository.findById(id).map(Funcionario::isAtivo).orElse(true);
+    }
+
     public Funcionario converterParaEntidade(FuncionarioDTO dto) {
         Funcionario e = new Funcionario();
         e.setIdfuncionario(dto.getIdfuncionario());
@@ -99,7 +114,7 @@ public class FuncionarioService {
         e.setFoneCelular(dto.getFoneCelular());
         e.setValorComissao(dto.getValorComissao());
         e.setFuncao(dto.getFuncao());
-        e.setAtivo(dto.getAtivo() != null ? dto.getAtivo() : false);
+        e.setAtivo(resolverAtivo(dto.getAtivo(), dto.getIdfuncionario()));
         return e;
     }
 

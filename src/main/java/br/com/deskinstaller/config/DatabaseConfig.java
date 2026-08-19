@@ -59,6 +59,12 @@ public class DatabaseConfig {
     @Value("${app.database.log-details-enabled:false}")
     private boolean logDetailsEnabled;
 
+    private final HibernateExtraProperties hibernateExtraProperties;
+
+    public DatabaseConfig(HibernateExtraProperties hibernateExtraProperties) {
+        this.hibernateExtraProperties = hibernateExtraProperties;
+    }
+
     /**
      * Configura o DataSource com HikariCP (pool de conexões)
      * HikariCP é conhecido por ser o pool mais rápido e confiável
@@ -167,6 +173,11 @@ public class DatabaseConfig {
         jpaProperties.put("hibernate.generate_statistics", false);
         jpaProperties.put("hibernate.cache.use_second_level_cache", false);
         jpaProperties.put("hibernate.cache.use_query_cache", false);
+
+        // Tudo definido em spring.jpa.properties.* no application.properties vence
+        // os defaults acima. E o que permite ajustar o Hibernate por configuracao,
+        // sem precisar editar esta classe.
+        jpaProperties.putAll(hibernateExtraProperties.getProperties());
 
         em.setJpaProperties(jpaProperties);
 

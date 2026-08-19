@@ -11,6 +11,7 @@ import br.com.deskinstaller.repository.EnderecoRepository;
 import br.com.deskinstaller.repository.OrdemServicoRepository;
 import br.com.deskinstaller.repository.OsFinanceiroRepository;
 import br.com.deskinstaller.repository.OsFuncionarioRepository;
+import br.com.deskinstaller.service.google.AgendaOrdemServicoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class OrdemservicoService {
     private final OsFuncionarioRepository osFuncionarioRepository;
     private final OsFinanceiroRepository osFinanceiroRepository;
     private final DomainValidationService domainValidationService;
+    private final AgendaOrdemServicoService agendaOrdemServicoService;
 
     /**
      * Lista todas as ordens de serviço
@@ -99,7 +101,7 @@ public class OrdemservicoService {
         aplicarDefaultsEOuValidacoes(ordem, existente);
         Ordemservico salvo = ordemServicoRepository.save(ordem);
         log.info("Ordem de serviço salva com sucesso. ID: {}", salvo.getIdordemServico());
-        return converterParaDTO(salvo);
+        return converterParaDTO(sincronizarAgenda(salvo));
     }
 
     @Transactional
@@ -108,7 +110,7 @@ public class OrdemservicoService {
         validarFinalizacao(ordem);
         ordem.setSituacao("Finalizada");
         ordem.setDatasituacao(new Date());
-        return converterParaDTO(ordemServicoRepository.save(ordem));
+        return converterParaDTO(sincronizarAgenda(ordemServicoRepository.save(ordem)));
     }
 
     @Transactional
@@ -119,7 +121,7 @@ public class OrdemservicoService {
         }
         ordem.setSituacao("Cancelada");
         ordem.setDatasituacao(new Date());
-        return converterParaDTO(ordemServicoRepository.save(ordem));
+        return converterParaDTO(sincronizarAgenda(ordemServicoRepository.save(ordem)));
     }
 
     /**
@@ -131,8 +133,25 @@ public class OrdemservicoService {
         if (!ordemServicoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Ordem de serviço não encontrada com ID: " + id);
         }
+        ordemServicoRepository.findById(id).ifPresent(agendaOrdemServicoService::remover);
         ordemServicoRepository.deleteById(id);
         log.info("Ordem de serviço deletada com sucesso");
+    }
+
+    /**
+     * Reflete a ordem na agenda da empresa e persiste o id do evento quando ele
+     * muda. Falhas de integracao ja sao tratadas dentro do servico de agenda:
+     * aqui elas nunca impedem a ordem de ser salva.
+     */
+    private Ordemservico sincronizarAgenda(Ordemservico ordem) {
+        String eventoAnterior = ordem.getGoogleEventId();
+        String eventoAtual = agendaOrdemServicoService.sincronizar(ordem);
+
+        if (!java.util.Objects.equals(eventoAnterior, eventoAtual)) {
+            ordem.setGoogleEventId(eventoAtual);
+            return ordemServicoRepository.save(ordem);
+        }
+        return ordem;
     }
 
     // ===== Métodos de Conversão =====
@@ -152,6 +171,7 @@ public class OrdemservicoService {
                 .enderecoResumo(resumirEndereco(ordem.getEndereco()))
                 .indicacao(ordem.getIndicacao())
                 .recebida(ordem.isRecebida())
+                .email(ordem.getEmail())
                 .build();
     }
 
@@ -177,6 +197,15 @@ public class OrdemservicoService {
         ordem.setEndereco(endereco);
         ordem.setIndicacao(dto.getIndicacao());
         ordem.setRecebida(dto.isRecebida());
+        ordem.setEmail(dto.getEmail());
+
+        // O DTO nao expoe o id do evento; sem isso, uma atualizacao apagaria o
+        // vinculo com a agenda e criaria um evento duplicado na proxima sincronia.
+        if (dto.getIdordemServico() != null) {
+            ordemServicoRepository.findById(dto.getIdordemServico())
+                    .map(Ordemservico::getGoogleEventId)
+                    .ifPresent(ordem::setGoogleEventId);
+        }
         return ordem;
     }
 

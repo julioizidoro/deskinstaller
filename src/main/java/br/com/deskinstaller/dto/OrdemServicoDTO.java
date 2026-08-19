@@ -42,4 +42,7 @@ public class OrdemServicoDTO implements Serializable {
     private String enderecoResumo;
     private String indicacao;
     private boolean recebida;
+
+    @jakarta.validation.constraints.Email(message = "email deve ser válido")
+    private String email;
 }

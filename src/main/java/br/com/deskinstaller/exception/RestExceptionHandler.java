@@ -1,7 +1,10 @@
 package br.com.deskinstaller.exception;
 
+import br.com.deskinstaller.service.whatsapp.WhatsAppApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class RestExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
@@ -72,6 +77,8 @@ public class RestExceptionHandler {
                 ? ex.getMostSpecificCause().getMessage()
                 : ex.getMessage();
 
+        log.warn("Violacao de integridade em {} {}: {}", request.getMethod(), request.getRequestURI(), mostSpecificMessage);
+
         if (mostSpecificMessage != null && mostSpecificMessage.contains("funcionario_idfuncionario")) {
             return buildResponse(
                     HttpStatus.CONFLICT,
@@ -84,8 +91,20 @@ public class RestExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "Violação de integridade de dados", request.getRequestURI(), null);
     }
 
+    /**
+     * Falha do servidor de WhatsApp e problema de dependencia externa, nao erro
+     * interno: 502 deixa isso claro para quem consome a API.
+     */
+    @ExceptionHandler(WhatsAppApiException.class)
+    public ResponseEntity<ApiErrorResponse> handleWhatsApp(WhatsAppApiException ex, HttpServletRequest request) {
+        log.error("Falha na integração com o WhatsApp em {} {}", request.getMethod(), request.getRequestURI(), ex);
+        return buildResponse(HttpStatus.BAD_GATEWAY, ex.getMessage(), request.getRequestURI(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
+        // O cliente recebe apenas uma mensagem generica; o detalhe fica no log do servidor.
+        log.error("Erro nao tratado em {} {}", request.getMethod(), request.getRequestURI(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno do servidor", request.getRequestURI(), null);
     }
 

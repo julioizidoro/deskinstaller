@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "osFuncionario")
+@Table(name = "osfuncionario")
 public class OsFuncionario implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

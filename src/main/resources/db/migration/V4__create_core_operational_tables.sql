@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS obstecnico (
         FOREIGN KEY (ordemservico_idordemservico) REFERENCES ordemservico (idordemServico)
 );
 
-CREATE TABLE IF NOT EXISTS osFuncionario (
+CREATE TABLE IF NOT EXISTS osfuncionario (
     idosFuncionario INT AUTO_INCREMENT PRIMARY KEY,
     ordemservico_idordemservico INT,
     funcionario_idfuncionario INT NOT NULL,

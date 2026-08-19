@@ -15,20 +15,23 @@ API REST em Spring Boot para gestão de clientes, endereços, ordens de serviço
 
 ## Estratégia de execução
 
-O projeto está configurado para rodar como `jar` executável com Tomcat embutido.
-
-Fluxo recomendado:
-
-```bash
-mvn clean package
-java -jar target/deskinstaller-api-1.0.0-SNAPSHOT.jar
-```
+O projeto é empacotado como `war` para deploy em um Tomcat externo (10.1 ou superior). O Tomcat embutido está marcado como `provided`, então continua disponível para execução local.
 
 Durante desenvolvimento:
 
 ```bash
 mvn spring-boot:run
 ```
+
+Para gerar o pacote de produção:
+
+```bash
+mvn clean package
+```
+
+O arquivo sai em `target/deskinstaller-api.war`. O passo a passo completo do deploy está em [docs/DEPLOY-PROD.md](docs/DEPLOY-PROD.md).
+
+Atenção ao context path: no modo WAR, o Tomcat monta a aplicação a partir do nome do arquivo. Com `deskinstaller-api.war`, a API responde em `/deskinstaller-api/api/...`, e a propriedade `server.servlet.context-path` é ignorada.
 
 No perfil `dev`, o Flyway fica desligado por padrão para evitar falhas locais com versões mais novas do MySQL.
 
@@ -179,8 +182,21 @@ export APP_SECURITY_PUBLIC_DOCS_ENABLED='false'
 Também defina um segredo JWT próprio e forte:
 
 ```bash
-export APP_SECURITY_JWT_SECRET='seu-segredo-base64-bem-longo'
+export APP_SECURITY_JWT_SECRET="$(openssl rand -base64 48)"
 ```
+
+O projeto não tem mais nenhum segredo padrão embutido no código. O comportamento é:
+
+- se `APP_SECURITY_JWT_SECRET` estiver vazio em `dev`, a aplicação gera uma chave aleatória válida apenas para aquela execução (os tokens são invalidados a cada restart) e registra um aviso no log
+- se estiver vazio em `prod`, a aplicação não sobe
+- o segredo precisa ser base64 e ter no mínimo 32 bytes (256 bits) após a decodificação
+
+Em `prod`, a subida também é bloqueada quando:
+
+- o segredo JWT é um dos valores de exemplo que já circularam no repositório
+- `app.cors.allowed-origins` está como `*` ou aponta apenas para `localhost`
+- `spring.jpa.hibernate.ddl-auto` não é `validate` nem `none`
+- a segurança está desligada, não existe usuário no banco, ou as docs estão públicas
 
 ## Endpoints principais
 
@@ -298,6 +314,7 @@ Hoje a suíte cobre:
 
 ## Arquivos úteis
 
+- [DEPLOY-PROD.md](docs/DEPLOY-PROD.md)
 - [CONFIG-MYSQL.md](docs/CONFIG-MYSQL.md)
 - [MIGRACAO-JPA.md](docs/MIGRACAO-JPA.md)
 - [PDF-GENERATOR-README.md](docs/PDF-GENERATOR-README.md)

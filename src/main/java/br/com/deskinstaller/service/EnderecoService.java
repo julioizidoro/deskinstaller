@@ -85,10 +85,26 @@ public class EnderecoService {
                 .cidade(e.getCidade())
                 .estado(e.getEstado())
                 .pontoReferencia(e.getPontoReferencia())
+                .foneInstalacao(e.getFoneInstalacao())
                 .idmaps(e.getIdmaps())
                 .ativo(e.isAtivo())
                 .cliente(e.getCliente())
                 .build();
+    }
+
+    /**
+     * Resolve a flag {@code ativo} sem apagar o estado atual: quando o payload
+     * omite o campo, uma criacao nasce ativa e uma atualizacao preserva o valor
+     * que ja esta no banco.
+     */
+    private boolean resolverAtivo(Boolean informado, Integer id) {
+        if (informado != null) {
+            return informado;
+        }
+        if (id == null) {
+            return true;
+        }
+        return enderecoRepository.findById(id).map(Endereco::isAtivo).orElse(true);
     }
 
     private Endereco converterParaEntidade(EnderecoDTO dto) {
@@ -103,8 +119,9 @@ public class EnderecoService {
         e.setCidade(dto.getCidade());
         e.setEstado(dto.getEstado());
         e.setPontoReferencia(dto.getPontoReferencia());
+        e.setFoneInstalacao(dto.getFoneInstalacao());
         e.setIdmaps(dto.getIdmaps());
-        e.setAtivo(dto.getAtivo() != null ? dto.getAtivo() : false);
+        e.setAtivo(resolverAtivo(dto.getAtivo(), dto.getIdendereco()));
         e.setCliente(dto.getCliente());
         return e;
     }

@@ -29,6 +29,7 @@ public class EnderecoDTO implements Serializable {
     private String cidade;
     private String estado;
     private String pontoReferencia;
+    private String foneInstalacao;
     private String idmaps;
     private Boolean ativo;
 

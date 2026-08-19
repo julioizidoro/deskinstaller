@@ -7,6 +7,8 @@ package br.com.deskinstaller.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -39,7 +41,9 @@ public class Ordemservico implements Serializable {
     @Basic(optional = false)
     @Column(name = "valor")
     private double valor;
-    @Lob
+    // MySQL reporta TINYTEXT/TEXT/MEDIUMTEXT/LONGTEXT como LONGVARCHAR;
+    // fixar o tipo evita falha de schema-validation contra o banco legado.
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "observacao")
     private String observacao;
     @Column(name = "situacao")
@@ -63,6 +67,15 @@ public class Ordemservico implements Serializable {
     private String indicacao;
     @Column(name = "recebida")
     private boolean recebida;
+
+    // E-mail convidado para o evento da agenda referente a esta OS.
+    @Column(name = "email", length = 255)
+    private String email;
+
+    // Id do evento correspondente no Google Calendar; nulo quando a OS ainda
+    // nao foi sincronizada ou quando a integracao esta desligada.
+    @Column(name = "googleEventId", length = 255)
+    private String googleEventId;
 
 
 }

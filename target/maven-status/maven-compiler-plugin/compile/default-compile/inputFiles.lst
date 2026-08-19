@@ -1,7 +1,10 @@
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/DeskInstallerApplication.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/ServletInitializer.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/CorsConfig.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/DatabaseConfig.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/DatabaseConnectionValidator.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/GoogleCalendarProperties.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/HibernateExtraProperties.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/JwtAuthenticationFilter.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/LegacySchemaCompatibilityConfig.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/OpenApiSecurityConfig.java
@@ -10,12 +13,15 @@
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/SecurityBootstrap.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/SecurityConfig.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/SecurityStartupValidator.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/config/WhatsAppProperties.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/AgendaEmailController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/ApClienteController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/AuthController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/ClienteController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/DatabaseMonitorController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/EnderecoController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/FuncionarioController.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/GoogleCalendarController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/ObsTecnicoController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/OrdemServicoController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/OsFinanceiroController.java
@@ -23,6 +29,8 @@
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/OsPDFController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/RelServicoController.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/ServicoController.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/controller/WhatsAppController.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/AgendaEmailDTO.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/ApclienteDTO.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/ClienteDTO.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/EnderecoDTO.java
@@ -37,10 +45,12 @@
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/auth/LoginRequestDTO.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/auth/LoginResponseDTO.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/auth/RefreshTokenRequestDTO.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/dto/whatsapp/WhatsAppDTOs.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/exception/ApiErrorResponse.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/exception/BusinessException.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/exception/ResourceNotFoundException.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/exception/RestExceptionHandler.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/model/AgendaEmail.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/model/Apcliente.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/model/Banco.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/model/Cliente.java
@@ -71,6 +81,7 @@
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/model/Subgrupo.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/model/Usuario.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/model/Vendedor.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/repository/AgendaEmailRepository.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/repository/ApClienteRepository.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/repository/ClienteRepository.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/repository/EnderecoRepository.java
@@ -84,6 +95,7 @@
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/repository/RoleRepository.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/repository/ServicoRepository.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/repository/UsuarioRepository.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/AgendaEmailService.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/ApClienteService.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/AppUserDetailsService.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/ClienteService.java
@@ -100,3 +112,10 @@
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/RefreshTokenService.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/RelServicoService.java
 /Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/ServicoService.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/google/AgendaOrdemServicoService.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/google/GoogleCalendarClient.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/google/GoogleCalendarException.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/google/GoogleOAuthService.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/google/GoogleTokenService.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/whatsapp/WhatsAppApiException.java
+/Users/julioizidoro/Git/deskinstaller/src/main/java/br/com/deskinstaller/service/whatsapp/WhatsAppApiService.java

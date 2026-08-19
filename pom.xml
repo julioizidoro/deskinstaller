@@ -14,7 +14,7 @@
   <groupId>br.com.deskinstaller</groupId>
   <artifactId>deskinstaller-api</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>war</packaging>
 
   <name>DeskInstaller API</name>
   <description>API REST do sistema DeskInstaller com Spring Boot e MySQL</description>
@@ -34,6 +34,14 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- Tomcat embutido vira 'provided': no WAR quem fornece o container e o
+         Tomcat externo. Para rodar local com mvn spring-boot:run continua funcionando. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-tomcat</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Spring Boot Starter Data JPA -->
@@ -120,6 +128,13 @@
       <artifactId>flyway-core</artifactId>
     </dependency>
 
+    <!-- Desde o Flyway 9 o suporte a MySQL vive num modulo separado.
+         Sem ele: "Unsupported Database: MySQL 8.0" na subida. -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-mysql</artifactId>
+    </dependency>
+
       <dependency>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -139,6 +154,9 @@
   </dependencies>
 
   <build>
+    <!-- Gera target/deskinstaller-api.war (sem a versao no nome do arquivo),
+         o que define o context-path /deskinstaller-api no Tomcat. -->
+    <finalName>deskinstaller-api</finalName>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

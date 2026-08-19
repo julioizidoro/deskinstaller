@@ -30,6 +30,13 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @ConditionalOnProperty(name = "app.security.enabled", havingValue = "true", matchIfMissing = true)
 public class AuthController {
 
+    /**
+     * Hash descartavel usado quando o usuario nao existe, para que o tempo de
+     * resposta do login nao revele se um username esta cadastrado.
+     */
+    private static final String HASH_DUMMY =
+            "{bcrypt}$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
@@ -42,6 +49,8 @@ public class AuthController {
         try {
             userDetails = userDetailsService.loadUserByUsername(request.username());
         } catch (UsernameNotFoundException ex) {
+            // Compara mesmo assim para manter o custo de tempo equivalente ao de um usuario existente.
+            passwordEncoder.matches(request.password(), HASH_DUMMY);
             throw new ResponseStatusException(UNAUTHORIZED, "Credenciais inválidas");
         }
 
