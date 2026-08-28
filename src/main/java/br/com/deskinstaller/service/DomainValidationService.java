@@ -8,12 +8,14 @@ import br.com.deskinstaller.model.Endereco;
 import br.com.deskinstaller.model.Funcionario;
 import br.com.deskinstaller.model.Ordemservico;
 import br.com.deskinstaller.model.Servico;
+import br.com.deskinstaller.model.Usuario;
 import br.com.deskinstaller.repository.ApClienteRepository;
 import br.com.deskinstaller.repository.ClienteRepository;
 import br.com.deskinstaller.repository.EnderecoRepository;
 import br.com.deskinstaller.repository.FuncionarioRepository;
 import br.com.deskinstaller.repository.OrdemServicoRepository;
 import br.com.deskinstaller.repository.ServicoRepository;
+import br.com.deskinstaller.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class DomainValidationService {
     private final OrdemServicoRepository ordemServicoRepository;
     private final ServicoRepository servicoRepository;
     private final ApClienteRepository apClienteRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Transactional(readOnly = true)
     public Cliente requireCliente(Integer clienteId) {
@@ -63,6 +66,12 @@ public class DomainValidationService {
     public Apcliente requireApcliente(Integer apclienteId) {
         return apClienteRepository.findById(apclienteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Apcliente não encontrado com ID: " + apclienteId));
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario requireUsuario(Integer usuarioId) {
+        return usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario não encontrado com ID: " + usuarioId));
     }
 
     @Transactional(readOnly = true)

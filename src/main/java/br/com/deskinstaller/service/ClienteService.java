@@ -187,7 +187,11 @@ public class ClienteService {
     /**
      * Converte entidade Cliente para DTO
      */
-    private ClienteDTO converterParaDTO(Cliente cliente) {
+    /**
+     * Conversao reaproveitada por outros services que devolvem o cliente
+     * completo dentro dos seus proprios DTOs.
+     */
+    public ClienteDTO converterParaDTO(Cliente cliente) {
         return ClienteDTO.builder()
                 .idcliente(cliente.getIdcliente())
                 .nome(cliente.getNome())

@@ -42,4 +42,25 @@ public interface OrdemServicoRepository extends JpaRepository<Ordemservico, Inte
 
     @Query("select distinct o from Ordemservico o left join fetch o.cliente")
     List<Ordemservico> findAllWithCliente();
+
+    // Agenda do dia: ordens com dataServico dentro do intervalo informado (qualquer situação)
+    @Query("select distinct o from Ordemservico o "
+            + "left join fetch o.cliente left join fetch o.endereco "
+            + "where o.dataServico between :inicio and :fim "
+            + "order by o.horaServico asc")
+    List<Ordemservico> findByDataServicoBetweenFetchClienteAndEndereco(
+            @Param("inicio") Date inicio,
+            @Param("fim") Date fim);
+
+    // Agenda do dia de um técnico específico (funcionário alocado na OS)
+    @Query("select distinct o from Ordemservico o "
+            + "left join fetch o.cliente left join fetch o.endereco "
+            + "join OsFuncionario f on f.ordemServico = o.idordemServico "
+            + "where o.dataServico between :inicio and :fim "
+            + "and f.funcionario.idfuncionario = :funcionarioId "
+            + "order by o.horaServico asc")
+    List<Ordemservico> findByDataServicoBetweenAndFuncionarioFetchClienteAndEndereco(
+            @Param("inicio") Date inicio,
+            @Param("fim") Date fim,
+            @Param("funcionarioId") Integer funcionarioId);
 }

@@ -63,7 +63,9 @@ public class AuthController {
 
         String token = jwtTokenService.generateToken(userDetails);
         RefreshToken refreshToken = refreshTokenService.issueToken(usuario);
-        return ResponseEntity.ok(buildLoginResponse(userDetails.getUsername(), token, refreshToken.getToken()));
+        return ResponseEntity.ok(buildLoginResponse(
+                userDetails.getUsername(), token, refreshToken.getToken(),
+                usuario.getId(), usuario.getIdfuncionario()));
     }
 
     @PostMapping("/refresh")
@@ -74,7 +76,10 @@ public class AuthController {
         String accessToken = jwtTokenService.generateToken(userDetails);
         RefreshToken rotatedToken = refreshTokenService.rotate(refreshToken);
 
-        return ResponseEntity.ok(buildLoginResponse(userDetails.getUsername(), accessToken, rotatedToken.getToken()));
+        return ResponseEntity.ok(buildLoginResponse(
+                userDetails.getUsername(), accessToken, rotatedToken.getToken(),
+                refreshToken.getUsuario().getId(),
+                refreshToken.getUsuario().getIdfuncionario()));
     }
 
     @PostMapping("/logout")
@@ -84,14 +89,17 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    private LoginResponseDTO buildLoginResponse(String username, String accessToken, String refreshToken) {
+    private LoginResponseDTO buildLoginResponse(String username, String accessToken, String refreshToken,
+                                                Integer idusuario, Integer idfuncionario) {
         return new LoginResponseDTO(
                 accessToken,
                 refreshToken,
                 "Bearer",
                 jwtTokenService.getExpirationSeconds(),
                 refreshTokenService.getRefreshTokenExpirationSeconds(),
-                username
+                username,
+                idusuario,
+                idfuncionario
         );
     }
 }

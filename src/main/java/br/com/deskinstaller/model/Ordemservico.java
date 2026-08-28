@@ -72,10 +72,17 @@ public class Ordemservico implements Serializable {
     @Column(name = "email", length = 255)
     private String email;
 
-    // Id do evento correspondente no Google Calendar; nulo quando a OS ainda
-    // nao foi sincronizada ou quando a integracao esta desligada.
     @Column(name = "googleEventId", length = 255)
     private String googleEventId;
+
+    // Usuario que registrou/e responsavel pela OS. Coluna escalar (sem FK),
+    // seguindo o padrao dos demais vinculos legados do schema.
+    @Column(name = "usuarioidusuario")
+    private Integer usuarioidusuario;
+
+    // Status informado pelo cliente na tela publica de agendamento.
+    @Column(name = "statuscliente", length = 15)
+    private String statuscliente;
 
 
 }

@@ -6,6 +6,8 @@ public record LoginResponseDTO(
         String tokenType,
         long expiresIn,
         long refreshExpiresIn,
-        String username
+        String username,
+        Integer idusuario,
+        Integer idfuncionario
 ) {
 }

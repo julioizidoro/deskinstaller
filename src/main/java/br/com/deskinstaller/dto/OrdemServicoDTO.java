@@ -2,6 +2,7 @@ package br.com.deskinstaller.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -45,4 +46,11 @@ public class OrdemServicoDTO implements Serializable {
 
     @jakarta.validation.constraints.Email(message = "email deve ser válido")
     private String email;
+
+    /** Usuário vinculado à ordem de serviço. */
+    private Integer usuarioidusuario;
+
+    /** Status informado pelo cliente no agendamento (Confirmado, Cancelamento solicitado...). */
+    @Size(max = 15, message = "statuscliente deve ter no máximo 15 caracteres")
+    private String statuscliente;
 }

@@ -13,6 +13,7 @@ import br.com.deskinstaller.service.whatsapp.WhatsAppApiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Expoe o servidor de WhatsApp atraves da API.
@@ -46,6 +49,12 @@ public class WhatsAppController {
 
     private static final String HEADER_CHAVE = "x-whatsapp-key";
 
+    /** Mesmos tipos e limite aceitos pelo servidor de WhatsApp. */
+    private static final List<String> MIMES_MIDIA_ACEITOS = List.of(
+            MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.APPLICATION_PDF_VALUE);
+
+    private static final long TAMANHO_MAXIMO_MIDIA = 10L * 1024 * 1024;
+
     private final WhatsAppApiService whatsAppApiService;
 
     // ===== Mensagens =====
@@ -57,21 +66,48 @@ public class WhatsAppController {
         return ResponseEntity.ok(whatsAppApiService.enviarMensagem(payload, apiKey));
     }
 
-    @PostMapping("/send-media")
+    /**
+     * Envia um documento (PDF ou imagem) em {@code multipart/form-data} e repassa
+     * para {@code POST /api/whatsapp/send-media} do servidor de WhatsApp.
+     *
+     * <p>Campos: {@code file} e {@code telefone} obrigatórios; {@code caption} e
+     * {@code sessionId} opcionais. O destino pode ser um telefone (o servidor
+     * normaliza para 55DDDNUMERO) ou um chatId terminado em {@code @c.us} /
+     * {@code @g.us}. Os limites validados aqui são os mesmos do servidor: PNG,
+     * JPEG ou PDF, até 10 MB — melhor recusar antes de subir o arquivo.
+     */
+    @PostMapping(value = "/send-media", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SendMediaResponse> enviarMidia(
             @RequestParam("telefone") String telefone,
             @RequestPart("file") MultipartFile arquivo,
+            @RequestParam(value = "caption", required = false) String caption,
+            @RequestParam(value = "sessionId", required = false) String sessionId,
             @RequestHeader(value = HEADER_CHAVE, required = false) String apiKey) {
 
+        if (telefone == null || telefone.isBlank()) {
+            throw new BusinessException("telefone é obrigatório");
+        }
         if (arquivo == null || arquivo.isEmpty()) {
             throw new BusinessException("Arquivo é obrigatório");
         }
+        if (arquivo.getSize() > TAMANHO_MAXIMO_MIDIA) {
+            throw new BusinessException("Arquivo excede o limite de 10MB");
+        }
 
-        String nome = arquivo.getOriginalFilename() != null ? arquivo.getOriginalFilename() : "arquivo";
-        String mime = arquivo.getContentType() != null ? arquivo.getContentType() : "application/octet-stream";
+        String nome = arquivo.getOriginalFilename() != null && !arquivo.getOriginalFilename().isBlank()
+                ? arquivo.getOriginalFilename()
+                : "documento";
+        String mime = arquivo.getContentType() != null
+                ? arquivo.getContentType().toLowerCase(Locale.ROOT).split(";")[0].trim()
+                : "";
 
-        log.info("POST /api/whatsapp/send-media - telefone={}, arquivo={} ({} bytes)",
-                telefone, nome, arquivo.getSize());
+        if (!MIMES_MIDIA_ACEITOS.contains(mime)) {
+            throw new BusinessException("Tipo de arquivo não suportado: "
+                    + (mime.isEmpty() ? "desconhecido" : mime) + ". Aceitos: PNG, JPEG e PDF.");
+        }
+
+        log.info("POST /api/whatsapp/send-media - telefone={}, arquivo={} ({} bytes, {})",
+                telefone, nome, arquivo.getSize(), mime);
 
         byte[] conteudo;
         try {
@@ -80,7 +116,8 @@ public class WhatsAppController {
             throw new BusinessException("Não foi possível ler o arquivo enviado");
         }
 
-        return ResponseEntity.ok(whatsAppApiService.enviarMidia(telefone, nome, mime, conteudo, apiKey));
+        return ResponseEntity.ok(
+                whatsAppApiService.enviarMidia(telefone, nome, mime, conteudo, apiKey, caption, sessionId));
     }
 
     // ===== Sessao =====

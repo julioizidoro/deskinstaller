@@ -27,7 +27,23 @@ public class SecurityConfig {
             "/api/auth/logout",
             // O navegador chega aqui redirecionado pelo Google, sem token da API.
             // A protecao e o parametro "state" validado em GoogleOAuthService.
-            "/api/google/calendar/callback"
+            "/api/google/calendar/callback",
+            // Links de agendamento abertos pelo cliente a partir do WhatsApp,
+            // sem token da API. Atencao: sao publicos por id da OS.
+            "/api/ordens-servico/*/confirmar",
+            "/api/ordens-servico/*/cancelar",
+            "/api/ordemservico/*/confirmar",
+            "/api/ordemservico/*/cancelar",
+            // Agenda do dia consultada pelo batch de aviso no WhatsApp, sem sessao.
+            "/api/ordens-servico/data",
+            "/api/ordemservico/data",
+            // Paginas de agendamento do front consultam a OS sem token.
+            "/api/confirmacao/*",
+            "/api/cancelamento/*",
+            // Integracao com o servidor de WhatsApp: chamada por processos e
+            // paginas sem sessao. Atencao: publica, sem token da API — quem
+            // alcancar a rede alcanca o envio.
+            "/api/whatsapp/**"
     };
 
     private static final String[] DOCS_ENDPOINTS = {
@@ -57,17 +73,8 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(publicDocsEnabled ? DOCS_ENDPOINTS : new String[]{}).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/database/**", "/api/funcionarios/**").hasRole("ADMIN")
-                        .requestMatchers("/api/google/calendar/**").hasRole("ADMIN")
-                        // Parear/encerrar sessao e desconectar a conta sao operacoes sensiveis;
-                        // o envio de mensagens continua liberado aos demais perfis.
-                        .requestMatchers("/api/whatsapp/session/**", "/api/whatsapp/debug/**").hasRole("ADMIN")
-                        .requestMatchers("/api/os/financeiro/**", "/api/osfinanceiro/**").hasAnyRole("ADMIN", "FINANCEIRO")
-                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAnyRole("ADMIN", "ATENDENTE")
-                        .requestMatchers(HttpMethod.PATCH, "/api/**").hasAnyRole("ADMIN", "ATENDENTE", "TECNICO", "FINANCEIRO")
-                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("ADMIN", "ATENDENTE", "TECNICO", "FINANCEIRO")
-                        .requestMatchers(HttpMethod.PUT, "/api/**").hasAnyRole("ADMIN", "ATENDENTE", "TECNICO", "FINANCEIRO")
-                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("ADMIN", "ATENDENTE", "TECNICO", "FINANCEIRO")
+                        // O sistema nao usa papeis: qualquer usuario autenticado acessa a API.
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

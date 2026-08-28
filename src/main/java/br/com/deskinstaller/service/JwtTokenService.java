@@ -109,7 +109,6 @@ public class JwtTokenService {
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
-                .claim("roles", userDetails.getAuthorities().stream().map(Object::toString).toList())
                 .signWith(signingKey)
                 .compact();
     }

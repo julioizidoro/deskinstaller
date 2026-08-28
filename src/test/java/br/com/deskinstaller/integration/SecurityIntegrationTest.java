@@ -1,8 +1,6 @@
 package br.com.deskinstaller.integration;
 
-import br.com.deskinstaller.model.Role;
 import br.com.deskinstaller.model.Usuario;
-import br.com.deskinstaller.repository.RoleRepository;
 import br.com.deskinstaller.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -36,22 +33,15 @@ class SecurityIntegrationTest {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setupUser() {
-        Role adminRole = roleRepository.findByName("ADMIN")
-                .orElseGet(() -> roleRepository.save(new Role(null, "ADMIN", "Administrador")));
-
         Usuario usuario = usuarioRepository.findByUsername("tester")
                 .orElseGet(Usuario::new);
         usuario.setUsername("tester");
         usuario.setPassword(passwordEncoder.encode("secret"));
         usuario.setAtivo(true);
-        usuario.setRoles(Set.of(adminRole));
         usuarioRepository.save(usuario);
     }
 

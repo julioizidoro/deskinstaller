@@ -17,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +44,7 @@ public class OrdemservicoService {
     private final OsFinanceiroRepository osFinanceiroRepository;
     private final DomainValidationService domainValidationService;
     private final AgendaOrdemServicoService agendaOrdemServicoService;
+    private final UsuarioAutenticadoService usuarioAutenticadoService;
 
     /**
      * Lista todas as ordens de serviço
@@ -85,6 +89,33 @@ public class OrdemservicoService {
     }
 
     /**
+     * Lista as ordens de serviço agendadas para uma data (qualquer situação).
+     * Usado pela agenda do dia do aplicativo mobile — o filtro é feito no banco,
+     * evitando trazer a lista completa para o cliente.
+     *
+     * @param data          dia da agenda; quando nulo, considera a data atual
+     * @param funcionarioId quando informado, traz apenas as OS em que o funcionário está alocado
+     */
+    @Transactional(readOnly = true)
+    public List<OrdemServicoDTO> listarPorData(LocalDate data, Integer funcionarioId) {
+        LocalDate dia = data != null ? data : LocalDate.now();
+        Date inicio = Date.from(dia.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date fim = Date.from(dia.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+
+        log.info("Listando ordens de serviço da data {} (funcionarioId={})", dia, funcionarioId);
+
+        List<Ordemservico> ordens = funcionarioId != null
+                ? ordemServicoRepository.findByDataServicoBetweenAndFuncionarioFetchClienteAndEndereco(inicio, fim, funcionarioId)
+                : ordemServicoRepository.findByDataServicoBetweenFetchClienteAndEndereco(inicio, fim);
+
+        log.info("Total de ordens encontradas para {}: {}", dia, ordens.size());
+
+        return ordens.stream()
+                .map(this::converterParaDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Salva ou atualiza uma ordem de serviço
      */
     @Transactional
@@ -98,6 +129,13 @@ public class OrdemservicoService {
             existente = domainValidationService.requireOrdemServico(dto.getIdordemServico());
         }
         Ordemservico ordem = converterParaEntidade(dto);
+        // Dono da OS definido no servidor: mantem o original na alteracao e usa
+        // o usuario autenticado na inclusao (o cliente nao decide isso).
+        if (existente != null && existente.getUsuarioidusuario() != null) {
+            ordem.setUsuarioidusuario(existente.getUsuarioidusuario());
+        } else {
+            usuarioAutenticadoService.idUsuarioAtual().ifPresent(ordem::setUsuarioidusuario);
+        }
         aplicarDefaultsEOuValidacoes(ordem, existente);
         Ordemservico salvo = ordemServicoRepository.save(ordem);
         log.info("Ordem de serviço salva com sucesso. ID: {}", salvo.getIdordemServico());
@@ -172,6 +210,8 @@ public class OrdemservicoService {
                 .indicacao(ordem.getIndicacao())
                 .recebida(ordem.isRecebida())
                 .email(ordem.getEmail())
+                .usuarioidusuario(ordem.getUsuarioidusuario())
+                .statuscliente(ordem.getStatuscliente())
                 .build();
     }
 
@@ -198,6 +238,8 @@ public class OrdemservicoService {
         ordem.setIndicacao(dto.getIndicacao());
         ordem.setRecebida(dto.isRecebida());
         ordem.setEmail(dto.getEmail());
+        ordem.setUsuarioidusuario(dto.getUsuarioidusuario());
+        ordem.setStatuscliente(dto.getStatuscliente());
 
         // O DTO nao expoe o id do evento; sem isso, uma atualizacao apagaria o
         // vinculo com a agenda e criaria um evento duplicado na proxima sincronia.

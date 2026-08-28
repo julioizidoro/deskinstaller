@@ -92,6 +92,21 @@ public class WhatsAppApiService {
 
     public SendMediaResponse enviarMidia(String telefone, String fileName, String fileMime,
                                          byte[] conteudo, String apiKey) {
+        return enviarMidia(telefone, fileName, fileMime, conteudo, apiKey, null, null);
+    }
+
+    /**
+     * Envia um PDF ou imagem para um contato ou grupo.
+     *
+     * <p>O servidor aceita {@code telefone} (normalizado para 55DDDNUMERO do lado
+     * de la) ou um {@code chatId} terminado em {@code @c.us}/{@code @g.us}; os
+     * dois chegam neste mesmo parametro. {@code caption} e {@code sessionId} sao
+     * enviados quando informados — o servidor atual os ignora, mas versoes que os
+     * usam recebem sem mudanca aqui.
+     */
+    public SendMediaResponse enviarMidia(String telefone, String fileName, String fileMime,
+                                         byte[] conteudo, String apiKey,
+                                         String caption, String sessionId) {
 
         ByteArrayResource arquivo = new ByteArrayResource(conteudo) {
             @Override
@@ -106,6 +121,12 @@ public class WhatsAppApiService {
         MultiValueMap<String, Object> formulario = new LinkedMultiValueMap<>();
         formulario.add("telefone", telefone);
         formulario.add("file", new HttpEntity<>(arquivo, cabecalhosDaParte));
+        if (caption != null && !caption.isBlank()) {
+            formulario.add("caption", caption);
+        }
+        if (sessionId != null && !sessionId.isBlank()) {
+            formulario.add("sessionId", sessionId);
+        }
 
         return executar(
                 () -> http.post()

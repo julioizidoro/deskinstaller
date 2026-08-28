@@ -26,13 +26,13 @@ public class RefreshToken implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idrefresh_token")
-    private Long id;
+    private Integer id;
 
     @Column(name = "token", nullable = false, unique = true, length = 255)
     private String token;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "usuario_idusuario", nullable = false)
+    @JoinColumn(name = "usuarioidusuario", nullable = false)
     private Usuario usuario;
 
     @Column(name = "expires_at", nullable = false)

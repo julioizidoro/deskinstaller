@@ -1,8 +1,6 @@
 package br.com.deskinstaller.integration;
 
-import br.com.deskinstaller.model.Role;
 import br.com.deskinstaller.model.Usuario;
-import br.com.deskinstaller.repository.RoleRepository;
 import br.com.deskinstaller.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,36 +32,33 @@ class SecurityAuthorizationIntegrationTest {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setupUser() {
-        Role financeiro = roleRepository.findByName("FINANCEIRO")
-                .orElseGet(() -> roleRepository.save(new Role(null, "FINANCEIRO", "Financeiro")));
-
         Usuario usuario = usuarioRepository.findByUsername("financeiro")
                 .orElseGet(Usuario::new);
         usuario.setUsername("financeiro");
         usuario.setPassword(passwordEncoder.encode("fin123"));
         usuario.setAtivo(true);
-        usuario.setRoles(Set.of(financeiro));
         usuarioRepository.save(usuario);
     }
 
+    /**
+     * O sistema nao usa mais papeis: qualquer usuario autenticado acessa
+     * inclusive os endpoints que antes eram restritos a ADMIN.
+     */
     @Test
-    void usuarioFinanceiroNaoDeveAcessarFuncionarios() throws Exception {
+    void usuarioAutenticadoDeveAcessarFuncionarios() throws Exception {
         String token = obterToken("financeiro", "fin123");
 
         mockMvc.perform(get("/api/funcionarios")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
-    void usuarioFinanceiroDeveAcessarClientesParaLeitura() throws Exception {
+    void usuarioAutenticadoDeveAcessarClientesParaLeitura() throws Exception {
         String token = obterToken("financeiro", "fin123");
 
         mockMvc.perform(get("/api/clientes")

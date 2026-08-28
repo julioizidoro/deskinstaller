@@ -268,9 +268,10 @@ export APP_DATABASE_MONITORING_ENABLED=true
 O projeto passou a incluir Flyway para migrações incrementais. As migrations atuais cobrem:
 
 - coluna `rgie` em `cliente`
-- tabelas de segurança `usuario`, `role` e `usuario_role`
+- tabela de segurança `usuario` (as tabelas `role` e `usuario_role` foram criadas na V2 e descartadas na V11: o sistema não usa papéis)
 - tabela `refresh_token`
 - tabelas operacionais centrais do domínio: `cliente`, `endereco`, `funcionario`, `servico`, `apcliente`, `ordemservico`, `relservico`, `obstecnico`, `osFuncionario` e `osfinanceiro`
+- coluna `idfuncionario` em `usuario`, coluna `usuarioidusuario` em `ordemservico` e as tabelas `contasreceber` e `contasreceberos`
 
 Para rodar com Flyway:
 

@@ -1,18 +1,24 @@
 package br.com.deskinstaller.controller;
 
+import br.com.deskinstaller.dto.ConfirmacaoOsDTO;
 import br.com.deskinstaller.dto.OrdemServicoDTO;
 import br.com.deskinstaller.dto.OsDTO;
 import br.com.deskinstaller.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
+import br.com.deskinstaller.service.ConfirmacaoOsService;
 import br.com.deskinstaller.service.OrdemservicoService;
 import br.com.deskinstaller.service.OsPDFService;
 import br.com.deskinstaller.service.PdfGeneratorService;
+import br.com.deskinstaller.service.whatsapp.OsNotificacaoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.context.Context;
 
+import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 @RestController
 @RequestMapping({"/api/ordens-servico", "/api/ordemservico"})
@@ -23,6 +29,8 @@ public class OrdemServicoController {
     private final OrdemservicoService ordemservicoService;
     private final OsPDFService osPDFService;
     private final PdfGeneratorService pdfGeneratorService;
+    private final OsNotificacaoService osNotificacaoService;
+    private final ConfirmacaoOsService confirmacaoOsService;
 
     @GetMapping
     public ResponseEntity<List<OrdemServicoDTO>> listarTodos() {
@@ -41,6 +49,44 @@ public class OrdemServicoController {
         return ResponseEntity.ok(ordemservicoService.listarSituacaoNaoCanceladaOuFinalizadaUltimos7Dias());
     }
 
+    /**
+     * Agenda do dia: ordens de serviço de uma data, em qualquer situação.
+     * URL: GET /api/ordens-servico/agenda?data=2026-08-25&funcionarioId=3
+     * Sem o parâmetro "data" considera o dia atual do servidor.
+     */
+    @GetMapping("/agenda")
+    public ResponseEntity<List<OrdemServicoDTO>> listarAgendaDoDia(
+            @RequestParam(value = "data", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+            @RequestParam(value = "funcionarioId", required = false) Integer funcionarioId) {
+        return ResponseEntity.ok(ordemservicoService.listarPorData(data, funcionarioId));
+    }
+
+    /**
+     * Ordens de serviço de uma data, cada uma já com os seus serviços — rota
+     * pública, usada pelo batch de aviso de agenda no WhatsApp, que roda sem
+     * sessão de usuário e não precisa de uma chamada extra por OS.
+     * URL: GET /api/ordens-servico/data?data=2026-08-29
+     * Sem o parâmetro "data" considera o dia atual do servidor.
+     */
+    @GetMapping("/data")
+    public ResponseEntity<List<ConfirmacaoOsDTO>> listarPorData(
+            @RequestParam(value = "data", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+        log.info("GET /api/ordens-servico/data?data={}", data);
+        return ResponseEntity.ok(confirmacaoOsService.listarPorData(data));
+    }
+
+    /**
+     * Atalho para a agenda do dia atual.
+     * URL: GET /api/ordens-servico/hoje?funcionarioId=3
+     */
+    @GetMapping("/hoje")
+    public ResponseEntity<List<OrdemServicoDTO>> listarAgendaDeHoje(
+            @RequestParam(value = "funcionarioId", required = false) Integer funcionarioId) {
+        return ResponseEntity.ok(ordemservicoService.listarPorData(LocalDate.now(), funcionarioId));
+    }
+
     @PostMapping
     public ResponseEntity<OrdemServicoDTO> salvar(@Valid @RequestBody OrdemServicoDTO dto) {
         OrdemServicoDTO salvo = ordemservicoService.salvar(dto);
@@ -56,6 +102,35 @@ public class OrdemServicoController {
     public ResponseEntity<OrdemServicoDTO> atualizar(@PathVariable Integer id, @Valid @RequestBody OrdemServicoDTO dto) {
         dto.setIdordemServico(id);
         return ResponseEntity.ok(ordemservicoService.salvar(dto));
+    }
+
+    /**
+     * Marca a OS como confirmada pelo cliente (statuscliente = "Confirmada") e
+     * redireciona para {frontendUrl}/confirmacao/{id}. A situação da OS não muda.
+     * URL: GET /api/ordens-servico/{id}/confirmar
+     */
+    @GetMapping("/{id}/confirmar")
+    public ResponseEntity<Void> confirmar(@PathVariable Integer id) {
+        String link = osNotificacaoService.linkConfirmacao(id);
+        log.info("GET /api/ordens-servico/{}/confirmar -> {}", id, link);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(link))
+                .build();
+    }
+
+    /**
+     * Marca o pedido de cancelamento do cliente (statuscliente = "Cancelar") e
+     * redireciona para {frontendUrl}/cancelamento/{id}. Não cancela a OS — isso
+     * continua em {@code PATCH /api/ordens-servico/{id}/cancelar}.
+     * URL: GET /api/ordens-servico/{id}/cancelar
+     */
+    @GetMapping("/{id}/cancelar")
+    public ResponseEntity<Void> linkCancelamento(@PathVariable Integer id) {
+        String link = osNotificacaoService.linkCancelamento(id);
+        log.info("GET /api/ordens-servico/{}/cancelar -> {}", id, link);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(link))
+                .build();
     }
 
     @PatchMapping("/{id}/finalizar")
