@@ -40,7 +40,7 @@ public class JwtTokenService {
     @Value("${app.security.jwt.secret:}")
     private String jwtSecret;
 
-    @Value("${app.security.jwt.expiration-seconds:3600}")
+    @Value("${app.security.jwt.expiration-seconds:14400}")
     private long expirationSeconds;
 
     private SecretKey signingKey;

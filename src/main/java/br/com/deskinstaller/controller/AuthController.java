@@ -1,5 +1,6 @@
 package br.com.deskinstaller.controller;
 
+import br.com.deskinstaller.dto.auth.AlterarSenhaRequestDTO;
 import br.com.deskinstaller.dto.auth.LoginRequestDTO;
 import br.com.deskinstaller.dto.auth.LoginResponseDTO;
 import br.com.deskinstaller.dto.auth.RefreshTokenRequestDTO;
@@ -12,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestController
@@ -86,6 +90,49 @@ public class AuthController {
     public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequestDTO request) {
         RefreshToken refreshToken = refreshTokenService.validate(request.refreshToken());
         refreshTokenService.revoke(refreshToken);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Troca a senha do usuario logado.
+     * <p>
+     * A senha atual e conferida aqui no backend; o username/idusuario do corpo
+     * precisam bater com o usuario do token (o corpo nunca decide de quem e a senha).
+     * Ao final, todos os refresh tokens do usuario sao revogados.
+     */
+    @PostMapping("/alterar-senha")
+    public ResponseEntity<Void> alterarSenha(@Valid @RequestBody AlterarSenhaRequestDTO request,
+                                             Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            throw new ResponseStatusException(UNAUTHORIZED, "Autenticação necessária");
+        }
+
+        String usernameAutenticado = authentication.getName();
+        if (!usernameAutenticado.equals(request.username())) {
+            throw new ResponseStatusException(FORBIDDEN, "Não é permitido alterar a senha de outro usuário");
+        }
+
+        Usuario usuario = usuarioRepository.findByUsername(usernameAutenticado)
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Usuário não encontrado"));
+
+        if (request.idusuario() != null && !request.idusuario().equals(usuario.getId())) {
+            throw new ResponseStatusException(FORBIDDEN, "Não é permitido alterar a senha de outro usuário");
+        }
+
+        if (!passwordEncoder.matches(request.senhaAtual(), usuario.getPassword())) {
+            throw new ResponseStatusException(BAD_REQUEST, "Senha atual incorreta");
+        }
+
+        if (passwordEncoder.matches(request.novaSenha(), usuario.getPassword())) {
+            throw new ResponseStatusException(BAD_REQUEST, "A nova senha deve ser diferente da senha atual");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(request.novaSenha()));
+        usuarioRepository.save(usuario);
+
+        // Invalida as sessoes existentes: nenhum refresh token antigo renova o acesso
+        refreshTokenService.revokeAll(usuario);
+
         return ResponseEntity.noContent().build();
     }
 

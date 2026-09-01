@@ -61,6 +61,16 @@ public class RefreshTokenService {
         refreshTokenRepository.save(refreshToken);
     }
 
+    /**
+     * Revoga todos os refresh tokens ativos do usuario.
+     * Usado na troca de senha: as demais sessoes deixam de conseguir renovar o acesso.
+     */
+    @Transactional
+    public void revokeAll(Usuario usuario) {
+        refreshTokenRepository.findByUsuarioAndRevokedFalse(usuario)
+                .forEach(this::revoke);
+    }
+
     @Transactional
     public RefreshToken rotate(RefreshToken refreshToken) {
         revoke(refreshToken);
