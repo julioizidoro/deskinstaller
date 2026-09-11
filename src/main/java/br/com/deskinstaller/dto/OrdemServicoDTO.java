@@ -29,6 +29,10 @@ public class OrdemServicoDTO implements Serializable {
     @NotNull(message = "dataServico é obrigatória")
     private Date dataServico;
     private double valor;
+    private double valordesconto;
+
+    @Size(max = 10, message = "tipocobranca deve ter no máximo 10 caracteres")
+    private String tipocobranca;
     private String observacao;
     private String situacao;
     private Date datasituacao;

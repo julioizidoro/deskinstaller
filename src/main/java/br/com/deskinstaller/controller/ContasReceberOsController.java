@@ -1,5 +1,6 @@
 package br.com.deskinstaller.controller;
 
+import br.com.deskinstaller.dto.ContasReceberDTO;
 import br.com.deskinstaller.dto.ContasReceberOsDTO;
 import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.service.ContasReceberOsService;
@@ -30,6 +31,12 @@ public class ContasReceberOsController {
     @GetMapping("/os/{id}")
     public ResponseEntity<List<ContasReceberOsDTO>> listarPorOrdemServico(@PathVariable Integer id) {
         return ResponseEntity.ok(contasReceberOsService.listarPorOrdemServico(id));
+    }
+
+    /** Títulos a receber (completos) de uma ordem de serviço. */
+    @GetMapping("/os/{id}/titulos")
+    public ResponseEntity<List<ContasReceberDTO>> listarTitulosPorOrdemServico(@PathVariable Integer id) {
+        return ResponseEntity.ok(contasReceberOsService.listarTitulosPorOrdemServico(id));
     }
 
     @GetMapping("/{id}")

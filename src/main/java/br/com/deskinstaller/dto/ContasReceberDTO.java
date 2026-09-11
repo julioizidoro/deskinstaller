@@ -40,6 +40,9 @@ public class ContasReceberDTO implements Serializable {
     @Size(max = 45, message = "numeronf deve ter no máximo 45 caracteres")
     private String numeronf;
 
+    /** Numero da parcela dentro do parcelamento (1, 2, 3...). */
+    private Integer numeroparcela;
+
     /** Preenchido pelo servidor a partir do usuário autenticado; o que vier do cliente é ignorado. */
     private Integer usuarioidusuario;
 

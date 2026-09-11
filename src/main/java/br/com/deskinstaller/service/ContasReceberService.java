@@ -144,6 +144,7 @@ public class ContasReceberService {
                 .valordesconto(e.getValordesconto())
                 .observacao(e.getObservacao())
                 .numeronf(e.getNumeronf())
+                .numeroparcela(e.getNumeroparcela())
                 .usuarioidusuario(e.getUsuarioidusuario())
                 .clienteidcliente(e.getCliente() != null ? e.getCliente().getIdcliente() : null)
                 .cliente(e.getCliente() != null ? clienteService.converterParaDTO(e.getCliente()) : null)
@@ -165,6 +166,7 @@ public class ContasReceberService {
         e.setValordesconto(dto.getValordesconto());
         e.setObservacao(dto.getObservacao());
         e.setNumeronf(dto.getNumeronf());
+        e.setNumeroparcela(dto.getNumeroparcela());
         e.setUsuarioidusuario(dto.getUsuarioidusuario());
         e.setCliente(cliente);
         return e;

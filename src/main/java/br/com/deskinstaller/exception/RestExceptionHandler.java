@@ -1,7 +1,9 @@
 package br.com.deskinstaller.exception;
 
 import br.com.deskinstaller.service.whatsapp.WhatsAppApiException;
+import br.com.deskinstaller.service.storage.StorageException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,6 +67,17 @@ public class RestExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Requisição inválida", request.getRequestURI(), ex.getMessage());
     }
 
+    /**
+     * URL sem handler mapeado (endpoint inexistente ou build desatualizado):
+     * responde 404 em vez de cair no handler genérico como 500.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(NoResourceFoundException ex,
+                                                                  HttpServletRequest request) {
+        log.warn("Endpoint nao encontrado: {} {}", request.getMethod(), request.getRequestURI());
+        return buildResponse(HttpStatus.NOT_FOUND, "Endpoint nao encontrado", request.getRequestURI(), null);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleResponseStatus(ResponseStatusException ex, HttpServletRequest request) {
         HttpStatusCode statusCode = ex.getStatusCode();
@@ -95,6 +109,18 @@ public class RestExceptionHandler {
      * Falha do servidor de WhatsApp e problema de dependencia externa, nao erro
      * interno: 502 deixa isso claro para quem consome a API.
      */
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<ApiErrorResponse> handleStorage(StorageException ex, HttpServletRequest request) {
+        log.error("Falha no armazenamento de arquivos em {} {}", request.getMethod(), request.getRequestURI(), ex);
+        return buildResponse(HttpStatus.BAD_GATEWAY, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleUploadSize(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.PAYLOAD_TOO_LARGE,
+                "Arquivo acima do tamanho máximo permitido.", request.getRequestURI(), null);
+    }
+
     @ExceptionHandler(WhatsAppApiException.class)
     public ResponseEntity<ApiErrorResponse> handleWhatsApp(WhatsAppApiException ex, HttpServletRequest request) {
         log.error("Falha na integração com o WhatsApp em {} {}", request.getMethod(), request.getRequestURI(), ex);

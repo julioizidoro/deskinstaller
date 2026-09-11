@@ -41,8 +41,11 @@ public class Ordemservico implements Serializable {
     @Basic(optional = false)
     @Column(name = "valor")
     private double valor;
-    // MySQL reporta TINYTEXT/TEXT/MEDIUMTEXT/LONGTEXT como LONGVARCHAR;
-    // fixar o tipo evita falha de schema-validation contra o banco legado.
+    @Column(name = "valordesconto")
+    private double valordesconto;
+    // Forma de cobranca da OS (ex.: AVISTA, PARCELADO). Texto curto, ate 10 chars.
+    @Column(name = "tipocobranca", length = 10)
+    private String tipocobranca;
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "observacao")
     private String observacao;

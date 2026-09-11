@@ -66,6 +66,10 @@ public class Contasreceber implements Serializable {
     @Column(name = "numeronf", length = 45)
     private String numeronf;
 
+    // Numero da parcela dentro do parcelamento (1, 2, 3...).
+    @Column(name = "numeroparcela")
+    private Integer numeroparcela;
+
     // Usuario responsavel pelo lancamento. Coluna escalar (sem @ManyToOne),
     // seguindo o padrao dos demais vinculos do schema legado.
     @Column(name = "usuarioidusuario", nullable = false)

@@ -199,6 +199,8 @@ public class OrdemservicoService {
                 .horaServico(ordem.getHoraServico())
                 .dataServico(ordem.getDataServico())
                 .valor(ordem.getValor())
+                .valordesconto(ordem.getValordesconto())
+                .tipocobranca(ordem.getTipocobranca())
                 .observacao(ordem.getObservacao())
                 .situacao(ordem.getSituacao())
                 .datasituacao(ordem.getDatasituacao())
@@ -229,6 +231,8 @@ public class OrdemservicoService {
         ordem.setHoraServico(dto.getHoraServico());
         ordem.setDataServico(dto.getDataServico());
         ordem.setValor(dto.getValor());
+        ordem.setValordesconto(dto.getValordesconto());
+        ordem.setTipocobranca(dto.getTipocobranca());
         ordem.setObservacao(dto.getObservacao());
         ordem.setSituacao(dto.getSituacao());
         ordem.setDatasituacao(dto.getDatasituacao());
@@ -252,7 +256,7 @@ public class OrdemservicoService {
     }
 
     private void aplicarDefaultsEOuValidacoes(Ordemservico ordem, Ordemservico existente) {
-        if (ordem.getSituacao() == null || ordem.getSituacao().isBlank()) {
+        if (ordem.getSituacao() == null || ordem.getSituacao().isEmpty()) {
             ordem.setSituacao("Aberta");
         }
         if (ordem.getDatasituacao() == null) {

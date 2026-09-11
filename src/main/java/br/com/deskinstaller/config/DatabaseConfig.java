@@ -44,7 +44,11 @@ public class DatabaseConfig {
     @Value("${spring.datasource.driverClassName}")
     private String driverClassName;
 
-    @Value("${spring.jpa.hibernate.ddl-auto:update}")
+    /**
+     * Schema legado, mantido por SQL manual: o default seguro e "validate".
+     * Nunca "update" — o Hibernate nao deve alterar a estrutura do banco.
+     */
+    @Value("${spring.jpa.hibernate.ddl-auto:validate}")
     private String ddlAuto;
 
     @Value("${spring.jpa.show-sql:false}")
@@ -151,16 +155,31 @@ public class DatabaseConfig {
 
         // Adapter do Hibernate
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setGenerateDdl(true);
+        // NAO gerar DDL: o schema deste projeto e legado e mantido por SQL manual.
+        // Com true, o adapter injeta hbm2ddl.auto=update e sobrepoe o JPA_DDL_AUTO
+        // do .env, fazendo o Hibernate tentar ALTER TABLE em todo boot.
+        vendorAdapter.setGenerateDdl(false);
         vendorAdapter.setShowSql(showSql);
         em.setJpaVendorAdapter(vendorAdapter);
 
         // Propriedades do Hibernate
         Properties jpaProperties = new Properties();
-        if (databasePlatform != null && !databasePlatform.isBlank()) {
+        if (databasePlatform != null && !databasePlatform.isEmpty()) {
             jpaProperties.put("hibernate.dialect", databasePlatform);
         }
-        jpaProperties.put("hibernate.hbm2ddl.auto", ddlAuto);
+        // Trava de seguranca: mesmo que alguem exporte JPA_DDL_AUTO=update/create,
+        // este projeto nunca deixa o Hibernate emitir DDL contra o banco.
+        String ddlSeguro = ddlAuto;
+        if (ddlSeguro == null || ddlSeguro.isEmpty()
+                || "update".equalsIgnoreCase(ddlSeguro)
+                || ddlSeguro.toLowerCase().startsWith("create")
+                || "drop".equalsIgnoreCase(ddlSeguro)) {
+            if (ddlSeguro != null && !ddlSeguro.isEmpty() && !"validate".equalsIgnoreCase(ddlSeguro)) {
+                log.warn("ddl-auto='{}' ignorado: schema legado e mantido por SQL manual. Usando 'validate'.", ddlSeguro);
+            }
+            ddlSeguro = "validate";
+        }
+        jpaProperties.put("hibernate.hbm2ddl.auto", ddlSeguro);
         jpaProperties.put("hibernate.show_sql", showSql);
         jpaProperties.put("hibernate.format_sql", formatSql);
         jpaProperties.put("hibernate.use_sql_comments", true);
@@ -183,7 +202,7 @@ public class DatabaseConfig {
 
         log.info("EntityManagerFactory configurado.");
         if (logDetailsEnabled && log.isDebugEnabled()) {
-            log.debug("DDL Auto: {}", ddlAuto);
+            log.debug("DDL Auto: {} (efetivo: {})", ddlAuto, jpaProperties.get("hibernate.hbm2ddl.auto"));
             log.debug("Show SQL: {}", showSql);
             log.debug("Pacotes escaneados: br.com.deskinstaller.model");
         }
@@ -215,7 +234,7 @@ public class DatabaseConfig {
     }
 
     private String maskUsername(String username) {
-        if (username == null || username.isBlank()) {
+        if (username == null || username.isEmpty()) {
             return "<vazio>";
         }
         if (username.length() <= 2) {

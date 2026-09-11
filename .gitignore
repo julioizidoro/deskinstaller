@@ -119,3 +119,6 @@ dist
 
 # Arquivos marcados para remocao manual pelo autor
 _to_delete/
+
+# graphify-axet
+.graphify/

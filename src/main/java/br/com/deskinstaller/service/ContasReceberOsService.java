@@ -1,5 +1,6 @@
 package br.com.deskinstaller.service;
 
+import br.com.deskinstaller.dto.ContasReceberDTO;
 import br.com.deskinstaller.dto.ContasReceberOsDTO;
 import br.com.deskinstaller.exception.BusinessException;
 import br.com.deskinstaller.exception.ResourceNotFoundException;
@@ -26,6 +27,7 @@ public class ContasReceberOsService {
     private final ContasReceberOsRepository contasReceberOsRepository;
     private final ContasReceberRepository contasReceberRepository;
     private final DomainValidationService domainValidationService;
+    private final ContasReceberService contasReceberService;
 
     @Transactional(readOnly = true)
     public List<ContasReceberOsDTO> listarPorContasReceber(Integer idContasReceber) {
@@ -39,6 +41,30 @@ public class ContasReceberOsService {
         return contasReceberOsRepository.findByOrdemservicoidordemServico(idOrdemServico).stream()
                 .map(this::converterParaDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Títulos a receber vinculados a uma ordem de serviço (dados completos, não só o vínculo).
+     */
+    @Transactional(readOnly = true)
+    public List<ContasReceberDTO> listarTitulosPorOrdemServico(Integer idOrdemServico) {
+        List<Integer> ids = contasReceberOsRepository.findByOrdemservicoidordemServico(idOrdemServico).stream()
+                .map(Contasreceberos::getContasreceberidcontasreceber)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<ContasReceberDTO> titulos = new java.util.ArrayList<>();
+        for (Integer idTitulo : ids) {
+            try {
+                contasReceberService.buscarPorId(idTitulo).ifPresent(titulos::add);
+            } catch (RuntimeException e) {
+                // Titulo com dado inconsistente (ex.: cliente inexistente) nao derruba a listagem.
+                log.warn("Falha ao carregar titulo a receber {} da OS {}: {}",
+                        idTitulo, idOrdemServico, e.toString());
+            }
+        }
+        return titulos;
     }
 
     @Transactional(readOnly = true)
