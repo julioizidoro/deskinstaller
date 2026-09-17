@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="'Orçamento Nº ' + ${orcamento.idorcamento}">Orçamento</title>
+    <style>
+        /*<![CDATA[*/
+        @page {
+            size: A4;
+            margin: 18mm 14mm 16mm 14mm;
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: Arial, sans-serif;
+                font-size: 9px;
+                color: #666;
+            }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #111;
+            margin: 0;
+        }
+        .cabecalho {
+            width: 100%;
+            border-bottom: 2px solid #0b4f8a;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+        }
+        .cabecalho td {
+            vertical-align: middle;
+            padding: 0;
+        }
+        .logo {
+            width: 90px;
+            height: auto;
+        }
+        .empresa-nome {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0b4f8a;
+        }
+        .empresa-dados {
+            font-size: 10px;
+            color: #444;
+            line-height: 1.5;
+        }
+        .doc-box {
+            text-align: right;
+        }
+        .doc-titulo {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0b4f8a;
+        }
+        .doc-numero {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .titulo-secao {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #0b4f8a;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 3px;
+            margin: 16px 0 8px 0;
+        }
+        table.dados {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.dados td {
+            padding: 3px 4px;
+            vertical-align: top;
+        }
+        .rotulo {
+            font-weight: bold;
+            width: 90px;
+            color: #444;
+        }
+        table.itens {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+        }
+        table.itens th {
+            background: #0b4f8a;
+            color: #fff;
+            font-size: 11px;
+            text-align: left;
+            padding: 6px;
+            border: 1px solid #0b4f8a;
+        }
+        table.itens td {
+            border: 1px solid #ccc;
+            padding: 6px;
+        }
+        table.itens tr:nth-child(even) td {
+            background: #f6f8fa;
+        }
+        .num {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .centro {
+            text-align: center;
+        }
+        .total-linha td {
+            border: none;
+            padding-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .observacao {
+            border: 1px solid #ccc;
+            padding: 8px;
+            min-height: 40px;
+            font-size: 11px;
+            white-space: pre-wrap;
+        }
+        .assinaturas {
+            width: 100%;
+            margin-top: 45px;
+        }
+        .assinaturas td {
+            text-align: center;
+            font-size: 10px;
+            color: #444;
+        }
+        .linha-assinatura {
+            width: 260px;
+            margin: 0 auto;
+            border-top: 1px solid #555;
+            padding-top: 4px;
+        }
+        .rodape {
+            margin-top: 18px;
+            font-size: 9px;
+            color: #777;
+            text-align: center;
+        }
+        /*]]>*/
+    </style>
+</head>
+<body>
+
+<!-- Cabecalho: logo + dados da empresa + identificacao do documento -->
+<table class="cabecalho">
+    <tr>
+        <td style="width: 100px;">
+            <img class="logo" th:if="${logoBase64 != null}"
+                 th:src="'data:image/png;base64,' + ${logoBase64}" alt="Logo"/>
+        </td>
+        <td>
+            <div class="empresa-nome">Onda Térmica</div>
+            <div class="empresa-dados">
+                CNPJ: 25.022.909/0001-71<br/>
+                contato@ondatermica.com.br<br/>
+                WhatsApp: (48) 98458-1815
+            </div>
+        </td>
+        <td class="doc-box" style="width: 150px;">
+            <div class="doc-titulo">ORÇAMENTO</div>
+            <div class="doc-numero" th:text="'Nº ' + ${orcamento.idorcamento}">Nº 0</div>
+        </td>
+    </tr>
+</table>
+
+<!-- Datas do documento -->
+<div class="titulo-secao">Dados do Orçamento</div>
+<table class="dados">
+    <tr>
+        <td class="rotulo">Emissão:</td>
+        <td th:text="${orcamento.dataemissao != null ? #dates.format(orcamento.dataemissao,'dd/MM/yyyy') : '-'}">-</td>
+        <td class="rotulo">Validade:</td>
+        <td th:text="${orcamento.datavalidade != null ? #dates.format(orcamento.datavalidade,'dd/MM/yyyy') : '-'}">-</td>
+        <td class="rotulo">Pagamento:</td>
+        <td th:text="${orcamento.formaPagamento} ?: '-'">-</td>
+    </tr>
+</table>
+
+<!-- Dados do cliente -->
+<div class="titulo-secao">Dados do Cliente</div>
+<table class="dados" th:with="cli=${orcamento.clienteDados}, ende=${orcamento.enderecoDados}">
+    <tr>
+        <td class="rotulo">Cliente:</td>
+        <td colspan="3" th:text="${cli != null ? (cli.idcliente + ' - ' + cli.nome) : '-'}">-</td>
+    </tr>
+    <tr>
+        <td class="rotulo">CPF/CNPJ:</td>
+        <td th:text="${cli != null and cli.cpfcnpj != null ? cli.cpfcnpj : '-'}">-</td>
+        <td class="rotulo">Contato:</td>
+        <td th:text="${cli != null and cli.contato != null ? cli.contato : '-'}">-</td>
+    </tr>
+    <tr>
+        <td class="rotulo">Telefone:</td>
+        <td th:text="${cli == null ? '-' : (cli.foneCelular != null ? cli.foneCelular : (cli.foneResidencial != null ? cli.foneResidencial : (cli.foneComercial != null ? cli.foneComercial : '-')))}">-</td>
+        <td class="rotulo">E-mail:</td>
+        <td th:text="${cli != null and cli.email != null ? cli.email : '-'}">-</td>
+    </tr>
+    <tr th:if="${ende != null}">
+        <td class="rotulo">Endereço:</td>
+        <td colspan="3" th:text="${(ende.tipoLogradouro != null ? ende.tipoLogradouro + ' ' : '') + (ende.logradouro != null ? ende.logradouro : '')
+                                 + (ende.numero != null ? ', ' + ende.numero : '')
+                                 + (ende.complemento != null ? ' - ' + ende.complemento : '')
+                                 + (ende.bairro != null ? ' - ' + ende.bairro : '')
+                                 + (ende.cidade != null ? ' - ' + ende.cidade : '')
+                                 + (ende.estado != null ? '/' + ende.estado : '')
+                                 + (ende.cep != null ? ' - CEP ' + ende.cep : '')}">-</td>
+    </tr>
+</table>
+
+<!-- Servicos orcados -->
+<div class="titulo-secao">Serviços</div>
+<table class="itens">
+    <thead>
+    <tr>
+        <th style="width: 30px;" class="centro">#</th>
+        <th>Serviço / Descrição</th>
+        <th style="width: 60px;" class="centro">Qtde</th>
+        <th style="width: 90px;" class="num">Vl. Unit.</th>
+        <th style="width: 95px;" class="num">Subtotal</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item, st : ${orcamento.itens}">
+        <td class="centro" th:text="${st.count}">1</td>
+        <td>
+            <span th:if="${item.servicoDados != null}"
+                  th:text="${item.servicoDados.descricao}">Serviço</span>
+            <span th:if="${item.descricao != null and item.descricao != ''}"
+                  th:text="${item.servicoDados != null ? ' - ' + item.descricao : item.descricao}">Descrição</span>
+        </td>
+        <td class="centro"
+            th:text="${item.quantidade != null ? #numbers.formatDecimal(item.quantidade,1,'POINT',2,'COMMA') : '0,00'}">0,00</td>
+        <td class="num" th:text="'R$ ' + ${#numbers.formatDecimal(item.valor,1,'POINT',2,'COMMA')}">R$ 0,00</td>
+        <td class="num"
+            th:text="'R$ ' + ${#numbers.formatDecimal((item.quantidade != null ? item.quantidade : 0) * item.valor,1,'POINT',2,'COMMA')}">R$ 0,00</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(orcamento.itens)}">
+        <td colspan="5" class="centro" style="color:#777;">Nenhum serviço lançado neste orçamento.</td>
+    </tr>
+    </tbody>
+    <tfoot>
+    <tr class="total-linha">
+        <td colspan="4" class="num">TOTAL GERAL</td>
+        <td class="num" th:text="'R$ ' + ${#numbers.formatDecimal(total,1,'POINT',2,'COMMA')}">R$ 0,00</td>
+    </tr>
+    </tfoot>
+</table>
+
+<!-- Observacoes -->
+<div th:if="${orcamento.observacao != null and orcamento.observacao != ''}">
+    <div class="titulo-secao">Observações</div>
+    <div class="observacao" th:text="${orcamento.observacao}">""</div>
+</div>
+
+<table class="assinaturas">
+    <tr>
+        <td><div class="linha-assinatura">Responsável</div></td>
+    </tr>
+</table>
+
+<div class="rodape"
+     th:text="${orcamento.datavalidade != null
+               ? 'Este orçamento é válido até ' + #dates.format(orcamento.datavalidade,'dd/MM/yyyy') + '.'
+               : 'Orçamento sujeito a alteração sem aviso prévio.'}">""</div>
+
+</body>
+</html>

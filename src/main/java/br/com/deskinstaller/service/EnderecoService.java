@@ -72,7 +72,7 @@ public class EnderecoService {
     }
 
     // Conversores
-    private EnderecoDTO converterParaDTO(Endereco e) {
+    public EnderecoDTO converterParaDTO(Endereco e) {
         if (e == null) return null;
         return EnderecoDTO.builder()
                 .idendereco(e.getIdendereco())

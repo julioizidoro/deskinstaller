@@ -43,11 +43,12 @@ public class Orcamento implements Serializable {
     @Basic(optional = false)
     @Column(name = "idorcamento")
     private Integer idorcamento;
-    @Column(name = "horaServico")
-    private String horaServico;
-    @Column(name = "dataservico")
+    @Column(name = "dataemissao")
     @Temporal(TemporalType.DATE)
-    private Date dataservico;
+    private Date dataemissao;
+    @Column(name = "datavalidade")
+    @Temporal(TemporalType.DATE)
+    private Date datavalidade;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "valor")
     private Float valor;
@@ -58,18 +59,14 @@ public class Orcamento implements Serializable {
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "observacao")
     private String observacao;
-    @Column(name = "Funcionario_idFuncionario")
-    private int Funcionario;
     @Column(name = "cliente_idcliente")
     private int cliente;
+    // FK legada mapeada como escalar, no mesmo padrao das demais entidades antigas.
+    // Integer (e nao int) porque a coluna e nova e fica NULL nas linhas ja existentes.
+    @Column(name = "endereco_idendereco")
+    private Integer endereco;
     @Column(name = "situacao")
     private String situacao;
-    @Column(name = "indicacao")
-    private String indicacao;
-    @Column(name = "status")
-    private String status;
-    @Column(name = "funcionario_idfuncionario")
-    private int funcionario;
 
 
 }
