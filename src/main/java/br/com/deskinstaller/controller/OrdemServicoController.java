@@ -9,6 +9,7 @@ import br.com.deskinstaller.service.ConfirmacaoOsService;
 import br.com.deskinstaller.service.OrdemservicoService;
 import br.com.deskinstaller.service.OsPDFService;
 import br.com.deskinstaller.service.PdfGeneratorService;
+import br.com.deskinstaller.service.ReciboOsPdfService;
 import br.com.deskinstaller.service.whatsapp.OsNotificacaoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,26 @@ public class OrdemServicoController {
     private final PdfGeneratorService pdfGeneratorService;
     private final OsNotificacaoService osNotificacaoService;
     private final ConfirmacaoOsService confirmacaoOsService;
+    private final ReciboOsPdfService reciboOsPdfService;
+
+    /**
+     * Recibo de recebimento dos valores da OS.
+     * GET /api/ordens-servico/{id}/recibo/pdf -> application/pdf
+     */
+    @GetMapping("/{id}/recibo/pdf")
+    public ResponseEntity<byte[]> gerarReciboPdf(@PathVariable Integer id) {
+        log.info("GET /api/ordens-servico/{}/recibo/pdf", id);
+        byte[] pdf = reciboOsPdfService.gerarPdf(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.inline()
+                .filename("recibo_os_" + id + ".pdf")
+                .build());
+        headers.setContentLength(pdf.length);
+
+        return ResponseEntity.ok().headers(headers).body(pdf);
+    }
 
     @GetMapping
     public ResponseEntity<List<OrdemServicoDTO>> listarTodos() {

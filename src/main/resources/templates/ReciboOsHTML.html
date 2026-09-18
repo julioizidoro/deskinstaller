@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="'Recibo OS Nº ' + ${os.idordemServico}">Recibo</title>
+    <style>
+        /*<![CDATA[*/
+        @page {
+            size: A4;
+            margin: 18mm 14mm 16mm 14mm;
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: Arial, sans-serif;
+                font-size: 9px;
+                color: #666;
+            }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #111;
+            margin: 0;
+        }
+        .cabecalho {
+            width: 100%;
+            border-bottom: 2px solid #0b4f8a;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+        }
+        .cabecalho td {
+            vertical-align: middle;
+            padding: 0;
+        }
+        .logo {
+            width: 90px;
+            height: auto;
+        }
+        .empresa-nome {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0b4f8a;
+        }
+        .empresa-dados {
+            font-size: 10px;
+            color: #444;
+            line-height: 1.5;
+        }
+        .doc-box {
+            text-align: right;
+        }
+        .doc-titulo {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0b4f8a;
+        }
+        .doc-numero {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .valor-destaque {
+            border: 2px solid #0b4f8a;
+            background: #eef4fa;
+            padding: 10px 14px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #0b4f8a;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .declaracao {
+            font-size: 13px;
+            line-height: 1.8;
+            text-align: justify;
+            margin-bottom: 4px;
+        }
+        .declaracao strong {
+            color: #0b4f8a;
+        }
+        .titulo-secao {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #0b4f8a;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 3px;
+            margin: 16px 0 8px 0;
+        }
+        table.dados {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.dados td {
+            padding: 3px 4px;
+            vertical-align: top;
+        }
+        .rotulo {
+            font-weight: bold;
+            width: 90px;
+            color: #444;
+        }
+        table.itens {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+        }
+        table.itens th {
+            background: #0b4f8a;
+            color: #fff;
+            font-size: 11px;
+            text-align: left;
+            padding: 6px;
+            border: 1px solid #0b4f8a;
+        }
+        table.itens td {
+            border: 1px solid #ccc;
+            padding: 6px;
+        }
+        table.itens tr:nth-child(even) td {
+            background: #f6f8fa;
+        }
+        .num {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .centro {
+            text-align: center;
+        }
+        .total-linha td {
+            border: none;
+            padding-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .local-data {
+            margin-top: 28px;
+            text-align: right;
+            font-size: 12px;
+        }
+        .assinaturas {
+            width: 100%;
+            margin-top: 40px;
+        }
+        .assinaturas td {
+            text-align: center;
+            font-size: 10px;
+            color: #444;
+        }
+        .linha-assinatura {
+            width: 260px;
+            margin: 0 auto;
+            border-top: 1px solid #555;
+            padding-top: 4px;
+        }
+        .rodape {
+            margin-top: 18px;
+            font-size: 9px;
+            color: #777;
+            text-align: center;
+        }
+        /*]]>*/
+    </style>
+</head>
+<body>
+
+<!-- Cabecalho -->
+<table class="cabecalho">
+    <tr>
+        <td style="width: 100px;">
+            <img class="logo" th:if="${logoBase64 != null}"
+                 th:src="'data:image/png;base64,' + ${logoBase64}" alt="Logo"/>
+        </td>
+        <td>
+            <div class="empresa-nome">Onda Térmica</div>
+            <div class="empresa-dados">
+                CNPJ: 25.022.909/0001-71<br/>
+                contato@ondatermica.com.br<br/>
+                WhatsApp: (48) 98458-1815
+            </div>
+        </td>
+        <td class="doc-box" style="width: 150px;">
+            <div class="doc-titulo">RECIBO</div>
+            <div class="doc-numero" th:text="'OS Nº ' + ${os.idordemServico}">OS Nº 0</div>
+        </td>
+    </tr>
+</table>
+
+<!-- Valor em destaque -->
+<div class="valor-destaque"
+     th:text="'R$ ' + ${#numbers.formatDecimal(total,1,'POINT',2,'COMMA')}">R$ 0,00</div>
+
+<!-- Declaracao de recebimento -->
+<p class="declaracao">
+    Recebemos de
+    <strong th:text="${cliente != null ? cliente.nome : '-'}">Cliente</strong><span
+        th:if="${cliente != null and cliente.cpfcnpj != null}"
+        th:text="', inscrito(a) no CPF/CNPJ sob o nº ' + ${cliente.cpfcnpj}">""</span>,
+    a importância de
+    <strong th:text="'R$ ' + ${#numbers.formatDecimal(total,1,'POINT',2,'COMMA')}">R$ 0,00</strong>
+    (<span th:text="${totalExtenso}">valor por extenso</span>),
+    referente aos serviços prestados conforme a Ordem de Serviço
+    <strong th:text="'nº ' + ${os.idordemServico}">nº 0</strong><span
+        th:if="${dataServico != null}" th:text="', executada em ' + ${dataServico}">""</span>,
+    dando plena e geral quitação do valor recebido.
+</p>
+
+<!-- Dados do pagador -->
+<div class="titulo-secao">Dados do Cliente</div>
+<table class="dados">
+    <tr>
+        <td class="rotulo">Cliente:</td>
+        <td colspan="3" th:text="${cliente != null ? (cliente.idcliente + ' - ' + cliente.nome) : '-'}">-</td>
+    </tr>
+    <tr>
+        <td class="rotulo">CPF/CNPJ:</td>
+        <td th:text="${cliente != null and cliente.cpfcnpj != null ? cliente.cpfcnpj : '-'}">-</td>
+        <td class="rotulo">Telefone:</td>
+        <td th:text="${cliente == null ? '-' : (cliente.foneCelular != null ? cliente.foneCelular : (cliente.foneResidencial != null ? cliente.foneResidencial : '-'))}">-</td>
+    </tr>
+    <tr th:if="${endereco != null}">
+        <td class="rotulo">Endereço:</td>
+        <td colspan="3" th:text="${(endereco.tipoLogradouro != null ? endereco.tipoLogradouro + ' ' : '') + (endereco.logradouro != null ? endereco.logradouro : '')
+                                 + (endereco.numero != null ? ', ' + endereco.numero : '')
+                                 + (endereco.complemento != null ? ' - ' + endereco.complemento : '')
+                                 + (endereco.bairro != null ? ' - ' + endereco.bairro : '')
+                                 + (endereco.cidade != null ? ' - ' + endereco.cidade : '')
+                                 + (endereco.estado != null ? '/' + endereco.estado : '')}">-</td>
+    </tr>
+</table>
+
+<!-- Servicos executados -->
+<div class="titulo-secao">Serviços Executados</div>
+<table class="itens">
+    <thead>
+    <tr>
+        <th>Serviço</th>
+        <th>Equipamento</th>
+        <th style="width: 110px;">Local</th>
+        <th style="width: 50px;" class="centro">Qtde</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="s : ${servicos}">
+        <td th:text="${s.servico}">-</td>
+        <td th:text="${s.equipamento}">-</td>
+        <td th:text="${s.local}">-</td>
+        <td class="centro" th:text="${s.quantidade}">1</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(servicos)}">
+        <td colspan="4" class="centro" style="color:#777;">Nenhum serviço lançado nesta ordem de serviço.</td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- Recebimentos -->
+<div class="titulo-secao">Valores Recebidos</div>
+<table class="itens">
+    <thead>
+    <tr>
+        <th>Documento / Parcela</th>
+        <th style="width: 85px;" class="centro">Vencimento</th>
+        <th style="width: 85px;" class="centro">Recebimento</th>
+        <th style="width: 110px;">Forma</th>
+        <th style="width: 100px;" class="num">Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="p : ${parcelas}">
+        <td th:text="${p.documento}">-</td>
+        <td class="centro" th:text="${p.vencimento}">-</td>
+        <td class="centro" th:text="${p.recebimento}">-</td>
+        <td th:text="${p.formaPagamento}">-</td>
+        <td class="num" th:text="'R$ ' + ${#numbers.formatDecimal(p.valor,1,'POINT',2,'COMMA')}">R$ 0,00</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(parcelas)}">
+        <td colspan="5" class="centro" style="color:#777;">
+            Sem títulos de recebimento lançados; valor conforme a ordem de serviço.
+        </td>
+    </tr>
+    </tbody>
+    <tfoot>
+    <tr class="total-linha">
+        <td colspan="4" class="num">TOTAL RECEBIDO</td>
+        <td class="num" th:text="'R$ ' + ${#numbers.formatDecimal(total,1,'POINT',2,'COMMA')}">R$ 0,00</td>
+    </tr>
+    </tfoot>
+</table>
+
+<div class="local-data" th:text="${cidade} + ', ' + ${dataExtenso} + '.'">Cidade, data.</div>
+
+<table class="assinaturas">
+    <tr>
+        <td><div class="linha-assinatura">Onda Térmica - CNPJ 25.022.909/0001-71</div></td>
+    </tr>
+</table>
+
+<div class="rodape">Este recibo refere-se exclusivamente aos valores discriminados acima.</div>
+
+</body>
+</html>
