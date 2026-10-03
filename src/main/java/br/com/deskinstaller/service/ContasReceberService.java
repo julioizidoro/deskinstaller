@@ -140,6 +140,7 @@ public class ContasReceberService {
                 .datavencimento(e.getDatavencimento())
                 .valorrecebido(e.getValorrecebido())
                 .datarecebimento(e.getDatarecebimento())
+                .formaRecebimento(e.getFormaRecebimento())
                 .valorjuros(e.getValorjuros())
                 .valordesconto(e.getValordesconto())
                 .observacao(e.getObservacao())
@@ -162,6 +163,7 @@ public class ContasReceberService {
         e.setDatavencimento(dto.getDatavencimento());
         e.setValorrecebido(dto.getValorrecebido());
         e.setDatarecebimento(dto.getDatarecebimento());
+        e.setFormaRecebimento(dto.getFormaRecebimento());
         e.setValorjuros(dto.getValorjuros());
         e.setValordesconto(dto.getValordesconto());
         e.setObservacao(dto.getObservacao());

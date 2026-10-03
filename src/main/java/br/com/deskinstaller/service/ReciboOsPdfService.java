@@ -193,24 +193,43 @@ public class ReciboOsPdfService {
      */
     private List<ReciboParcelaDTO> montarParcelas(List<Contasreceber> titulos, List<OsFinanceiro> financeiro) {
         String forma = formaPagamento(financeiro);
+        // Data de recebimento de reserva: a registrada no financeiro da OS.
+        LocalDate dataFinanceiro = financeiro.stream()
+                .map(OsFinanceiro::getData)
+                .filter(d -> d != null)
+                .findFirst()
+                .orElse(null);
         List<ReciboParcelaDTO> parcelas = new ArrayList<>();
 
+        List<Contasreceber> recebidos = new ArrayList<>();
         for (Contasreceber t : titulos) {
             boolean recebido = t.getDatarecebimento() != null
                     || (t.getValorrecebido() != null && t.getValorrecebido().signum() > 0);
-            if (!recebido) {
-                continue;
+            if (recebido) {
+                recebidos.add(t);
             }
+        }
+        // Ordena por data real (nao pela string dd/MM/yyyy); sem data vai para o fim.
+        recebidos.sort((a, b) -> {
+            LocalDate da = a.getDatarecebimento() != null ? a.getDatarecebimento() : dataFinanceiro;
+            LocalDate db = b.getDatarecebimento() != null ? b.getDatarecebimento() : dataFinanceiro;
+            if (da == null && db == null) return 0;
+            if (da == null) return 1;
+            if (db == null) return -1;
+            return da.compareTo(db);
+        });
+
+        for (Contasreceber t : recebidos) {
+            LocalDate dataReceb = t.getDatarecebimento() != null ? t.getDatarecebimento() : dataFinanceiro;
             parcelas.add(ReciboParcelaDTO.builder()
                     .documento(descricaoDocumento(t))
                     .vencimento(t.getDatavencimento() != null ? t.getDatavencimento().format(DATA) : "-")
-                    .recebimento(t.getDatarecebimento() != null ? t.getDatarecebimento().format(DATA) : "-")
-                    .formaPagamento(forma)
+                    .recebimento(dataReceb != null ? dataReceb.format(DATA) : "-")
+                    .formaPagamento(t.getFormaRecebimento() != null && !t.getFormaRecebimento().isBlank()
+                            ? t.getFormaRecebimento() : forma)
                     .valor(t.getValorrecebido() != null ? t.getValorrecebido() : BigDecimal.ZERO)
                     .build());
         }
-
-        parcelas.sort((a, b) -> a.getRecebimento().compareTo(b.getRecebimento()));
 
         // Nenhum titulo lancado: usa o que foi registrado no financeiro da OS.
         if (parcelas.isEmpty()) {

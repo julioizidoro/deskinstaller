@@ -51,6 +51,10 @@ public class Contasreceber implements Serializable {
     @Column(name = "datarecebimento")
     private LocalDate datarecebimento;
 
+    // Forma pela qual o titulo foi recebido (Pix, Boleto, Dinheiro...).
+    @Column(name = "formarecebimento", length = 50)
+    private String formaRecebimento;
+
     @Column(name = "valorjuros", precision = 10, scale = 2)
     private BigDecimal valorjuros;
 

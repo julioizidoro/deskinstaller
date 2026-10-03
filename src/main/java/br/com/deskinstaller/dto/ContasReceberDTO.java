@@ -33,6 +33,10 @@ public class ContasReceberDTO implements Serializable {
     private LocalDate datavencimento;
     private BigDecimal valorrecebido;
     private LocalDate datarecebimento;
+
+    @Size(max = 50, message = "formaRecebimento deve ter no máximo 50 caracteres")
+    private String formaRecebimento;
+
     private BigDecimal valorjuros;
     private BigDecimal valordesconto;
     private String observacao;
