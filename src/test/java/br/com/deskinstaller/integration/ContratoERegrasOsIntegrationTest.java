@@ -97,7 +97,7 @@ class ContratoERegrasOsIntegrationTest {
 
     @Test
     void finalizarOrdemComEquipeEFinanceiro_deveFuncionar() throws Exception {
-        OrdemServicoDTO ordem = criarOrdemBasica();
+        OrdemServicoDTO ordem = criarOrdemBasica(true);
         FuncionarioDTO funcionario = criarFuncionario();
 
         mockMvc.perform(post("/api/os/funcionario")
@@ -143,6 +143,10 @@ class ContratoERegrasOsIntegrationTest {
     }
 
     private OrdemServicoDTO criarOrdemBasica() throws Exception {
+        return criarOrdemBasica(false);
+    }
+
+    private OrdemServicoDTO criarOrdemBasica(boolean recebida) throws Exception {
         ClienteDTO cliente = criarCliente("ordem@example.com");
         EnderecoDTO endereco = criarEndereco(cliente.getIdcliente(), "Rua Principal");
 
@@ -155,7 +159,7 @@ class ContratoERegrasOsIntegrationTest {
                                 .dataServico(new Date())
                                 .valor(150.0)
                                 .situacao("Aberta")
-                                .recebida(false)
+                                .recebida(recebida)
                                 .build())))
                 .andExpect(status().isCreated())
                 .andReturn()

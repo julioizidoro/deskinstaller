@@ -65,6 +65,15 @@ public class OrdemServicoController {
                 .orElseThrow(() -> new ResourceNotFoundException("Ordem de serviço não encontrada com ID: " + id));
     }
 
+    /** GET /api/ordens-servico/pesquisa?numero=&cliente=&endereco= — últimos 2 anos, qualquer situação */
+    @GetMapping("/pesquisa")
+    public ResponseEntity<List<OrdemServicoDTO>> pesquisar(
+            @RequestParam(value = "numero", required = false) Integer numero,
+            @RequestParam(value = "cliente", required = false) String cliente,
+            @RequestParam(value = "endereco", required = false) String endereco) {
+        return ResponseEntity.ok(ordemservicoService.pesquisar(numero, cliente, endereco));
+    }
+
     @GetMapping("/ativas")
     public ResponseEntity<List<OrdemServicoDTO>> listarSituacaoNaoCanceladaOuFinalizadaUltimos7Dias() {
         return ResponseEntity.ok(ordemservicoService.listarSituacaoNaoCanceladaOuFinalizadaUltimos7Dias());

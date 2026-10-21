@@ -33,6 +33,29 @@ public interface OrdemServicoRepository extends JpaRepository<Ordemservico, Inte
     @Query("select distinct o from Ordemservico o left join fetch o.cliente left join fetch o.endereco where (o.situacao not in :situacoes or o.datasituacao >= :limite)")
     List<Ordemservico> findBySituacaoNotInOrDatasituacaoGreaterThanEqualFetchClienteAndEndereco(@Param("situacoes") List<String> situacoes, @Param("limite") Date limite);
 
+    /**
+     * Pesquisa por numero da OS, nome do cliente e/ou endereco, em qualquer situacao,
+     * limitada as OS com dataServico >= limite. Filtro vazio ("" ou null) e ignorado.
+     */
+    @Query("select distinct o from Ordemservico o left join fetch o.cliente c left join fetch o.endereco e "
+         + "where (o.dataServico is null or o.dataServico >= :limite) "
+         + "and (:numero is null or o.idordemServico = :numero) "
+         + "and (:cliente = '' or lower(c.nome) like lower(concat('%', :cliente, '%'))) "
+         + "and (:endereco = '' or lower(concat(coalesce(e.tipoLogradouro, ''), ' ', coalesce(e.logradouro, ''), ' ', "
+         + "coalesce(e.numero, ''), ' ', coalesce(e.complemento, ''), ' ', coalesce(e.bairro, ''), ' ', "
+         + "coalesce(e.cidade, ''))) like lower(concat('%', :endereco, '%'))) "
+         + "order by o.dataServico desc")
+    List<Ordemservico> pesquisar(@Param("numero") Integer numero,
+                                 @Param("cliente") String cliente,
+                                 @Param("endereco") String endereco,
+                                 @Param("limite") Date limite);
+
+    /** Abertas (sempre) + Finalizadas/Canceladas cuja datasituacao e >= limite (ultimos 7 dias). */
+    @Query("select distinct o from Ordemservico o left join fetch o.cliente left join fetch o.endereco "
+         + "where o.situacao = 'Aberta' "
+         + "or (o.situacao in ('Finalizada', 'Cancelada') and o.datasituacao >= :limite)")
+    List<Ordemservico> findAbertasOuEncerradasDesdeFetchClienteAndEndereco(@Param("limite") Date limite);
+
     // Garantir carregamento do cliente com join fetch para evitar problemas de lazy loading
     @Query("select o from Ordemservico o left join fetch o.cliente where o.idordemServico = :id")
     Optional<Ordemservico> findByIdWithCliente(@Param("id") Integer id);

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -70,20 +71,36 @@ public class OrdemservicoService {
     }
 
     /**
-     * Lista ordens onde A) a situação NÃO é Cancelada/Finalizada OR
-     * B) cuja datasituacao é nos últimos 7 dias (ou seja: traz ordens que
-     * estejam abertas/ativas ou que tenham sido atualizadas nos últimos 7 dias).
+     * Lista todas as ordens com situação "Aberta" e as "Finalizada"/"Cancelada"
+     * cuja datasituacao esteja nos últimos 7 dias.
      */
     @Transactional(readOnly = true)
     public List<OrdemServicoDTO> listarSituacaoNaoCanceladaOuFinalizadaUltimos7Dias() {
-        List<String> situacoes = Arrays.asList("Cancelada", "Finalizada");
         // Limite: 7 dias anteriores à data atual (inclusive)
         Date limite = new Date(System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000);
 
-        // Busca usando OR com JOIN FETCH do cliente e endereco para evitar lazy loading
-        List<Ordemservico> ordens = ordemServicoRepository.findBySituacaoNotInOrDatasituacaoGreaterThanEqualFetchClienteAndEndereco(situacoes, limite);
+        // Todas as Abertas + Finalizadas/Canceladas dos últimos 7 dias (JOIN FETCH evita lazy loading)
+        List<Ordemservico> ordens = ordemServicoRepository.findAbertasOuEncerradasDesdeFetchClienteAndEndereco(limite);
 
         return ordens.stream()
+                .map(this::converterParaDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Pesquisa OS por número, nome do cliente e/ou endereço, em qualquer situação,
+     * considerando apenas os últimos 2 anos (pela data do serviço).
+     */
+    @Transactional(readOnly = true)
+    public List<OrdemServicoDTO> pesquisar(Integer numero, String cliente, String endereco) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, -2);
+        Date limite = cal.getTime();
+
+        String nomeCliente = cliente == null ? "" : cliente.trim();
+        String textoEndereco = endereco == null ? "" : endereco.trim();
+
+        return ordemServicoRepository.pesquisar(numero, nomeCliente, textoEndereco, limite).stream()
                 .map(this::converterParaDTO)
                 .collect(Collectors.toList());
     }
@@ -290,12 +307,8 @@ public class OrdemservicoService {
             throw new BusinessException("Não é possível finalizar a ordem de serviço sem equipe vinculada");
         }
 
-        double totalRecebido = osFinanceiroRepository.findByOrdemservico(ordem.getIdordemServico()).stream()
-                .map(item -> item.getValorrecebido() != null ? item.getValorrecebido().doubleValue() : 0.0)
-                .reduce(0.0, Double::sum);
-
-        if (totalRecebido < ordem.getValor()) {
-            throw new BusinessException("Não é possível finalizar a ordem de serviço com valor recebido menor que o valor total");
+        if (!ordem.isRecebida()) {
+            throw new BusinessException("Não é possível finalizar a ordem de serviço com contas a receber em aberto");
         }
     }
 
