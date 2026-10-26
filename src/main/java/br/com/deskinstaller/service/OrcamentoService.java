@@ -36,6 +36,9 @@ public class OrcamentoService {
     private final ClienteService clienteService;
     private final EnderecoService enderecoService;
 
+    /** Endereco padrao usado quando o orcamento e salvo sem endereco. */
+    private static final Integer ENDERECO_PADRAO_ID = 1;
+
     @Transactional(readOnly = true)
     public List<OrcamentoDTO> listarTodos() {
         return orcamentoRepository.findAll().stream()
@@ -85,7 +88,11 @@ public class OrcamentoService {
         }
 
         domainValidationService.requireCliente(dto.getCliente());
-        if (dto.getEndereco() != null) {
+        if (dto.getEndereco() == null) {
+            // Endereco e opcional: sem endereco selecionado, usa o endereco padrao (id 1).
+            domainValidationService.requireEndereco(ENDERECO_PADRAO_ID);
+            dto.setEndereco(ENDERECO_PADRAO_ID);
+        } else if (!ENDERECO_PADRAO_ID.equals(dto.getEndereco())) {
             // Garante que o endereco informado pertence ao cliente do orcamento.
             domainValidationService.validateEnderecoDoCliente(dto.getEndereco(), dto.getCliente());
         }

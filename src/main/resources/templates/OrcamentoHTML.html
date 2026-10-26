@@ -200,7 +200,7 @@
         <td class="rotulo">E-mail:</td>
         <td th:text="${cli != null and cli.email != null ? cli.email : '-'}">-</td>
     </tr>
-    <tr th:if="${ende != null}">
+    <tr th:if="${ende != null and ende.idendereco != null and ende.idendereco != 1}">
         <td class="rotulo">Endereço:</td>
         <td colspan="3" th:text="${(ende.tipoLogradouro != null ? ende.tipoLogradouro + ' ' : '') + (ende.logradouro != null ? ende.logradouro : '')
                                  + (ende.numero != null ? ', ' + ende.numero : '')
