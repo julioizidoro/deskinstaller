@@ -307,9 +307,6 @@ public class OrdemservicoService {
             throw new BusinessException("Não é possível finalizar a ordem de serviço sem equipe vinculada");
         }
 
-        if (!ordem.isRecebida()) {
-            throw new BusinessException("Não é possível finalizar a ordem de serviço com contas a receber em aberto");
-        }
     }
 
     private String resumirEndereco(Endereco endereco) {
