@@ -23,7 +23,7 @@ public class RelOrcamentoDTO implements Serializable {
 
     private Integer idrelorcamento;
 
-    @Size(max = 100, message = "descricao deve ter no maximo 100 caracteres")
+    @Size(max = 255, message = "descricao deve ter no maximo 255 caracteres")
     private String descricao;
 
     private Double quantidade;

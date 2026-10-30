@@ -33,7 +33,7 @@ public class Relorcamento implements Serializable {
     @Basic(optional = false)
     @Column(name = "idrelorcamento")
     private Integer idrelorcamento;
-    @Column(name = "descricao")
+    @Column(name = "descricao", length = 255)
     private String descricao;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "quantidade")
