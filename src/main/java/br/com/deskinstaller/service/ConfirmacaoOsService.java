@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ConfirmacaoOsService {
 
+    private static final String SITUACAO_EM_EXECUCAO = "Aberta";
+
     private final DomainValidationService domainValidationService;
     private final OrdemServicoRepository ordemServicoRepository;
     private final RelServicoRepository relServicoRepository;
@@ -55,6 +57,27 @@ public class ConfirmacaoOsService {
 
         log.info("Agenda de {}: {} OS", dia, ordens.size());
         return ordens.stream().map(this::converter).collect(Collectors.toList());
+    }
+
+    /**
+     * OS em execução (situação "Aberta") agendadas para amanhã — base para
+     * avisar os clientes um dia antes.
+     */
+    @Transactional(readOnly = true)
+    public List<ConfirmacaoOsDTO> listarParaComunicar() {
+        LocalDate amanha = LocalDate.now().plusDays(1);
+        Date inicio = Date.from(amanha.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date fim = Date.from(amanha.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).toInstant());
+
+        List<Ordemservico> ordens = ordemServicoRepository
+                .findByDataServicoBetweenAndSituacaoFetchClienteAndEndereco(inicio, fim, SITUACAO_EM_EXECUCAO);
+
+        log.info("Comunicar {}: {} OS em execução", amanha, ordens.size());
+        return ordens.stream().map(os -> {
+            ConfirmacaoOsDTO dto = converter(os);
+            dto.setFoneCelular(os.getCliente() != null ? os.getCliente().getFoneCelular() : null);
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     private ConfirmacaoOsDTO converter(Ordemservico os) {

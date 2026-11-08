@@ -1,5 +1,6 @@
 package br.com.deskinstaller.controller;
 
+import br.com.deskinstaller.dto.ComunicacaoOsResultadoDTO;
 import br.com.deskinstaller.dto.ConfirmacaoOsDTO;
 import br.com.deskinstaller.dto.OrdemServicoDTO;
 import br.com.deskinstaller.dto.OsDTO;
@@ -10,6 +11,7 @@ import br.com.deskinstaller.service.OrdemservicoService;
 import br.com.deskinstaller.service.OsPDFService;
 import br.com.deskinstaller.service.PdfGeneratorService;
 import br.com.deskinstaller.service.ReciboOsPdfService;
+import br.com.deskinstaller.service.whatsapp.ComunicacaoOsService;
 import br.com.deskinstaller.service.whatsapp.OsNotificacaoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class OrdemServicoController {
     private final PdfGeneratorService pdfGeneratorService;
     private final OsNotificacaoService osNotificacaoService;
     private final ConfirmacaoOsService confirmacaoOsService;
+    private final ComunicacaoOsService comunicacaoOsService;
     private final ReciboOsPdfService reciboOsPdfService;
 
     /**
@@ -105,6 +108,18 @@ public class OrdemServicoController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
         log.info("GET /api/ordens-servico/data?data={}", data);
         return ResponseEntity.ok(confirmacaoOsService.listarPorData(data));
+    }
+
+    /**
+     * Envia por WhatsApp o aviso das OS em execução (situação "Aberta") agendadas
+     * para amanhã (data atual + 1) e devolve o log: data do envio, quantidade,
+     * números das OS enviadas e falhas.
+     * URL: GET /api/ordens-servico/comunicar
+     */
+    @GetMapping("/comunicar")
+    public ResponseEntity<ComunicacaoOsResultadoDTO> comunicar() {
+        log.info("GET /api/ordens-servico/comunicar");
+        return ResponseEntity.ok(comunicacaoOsService.comunicarAmanha());
     }
 
     /**

@@ -37,6 +37,9 @@ public class SecurityConfig {
             // Agenda do dia consultada pelo batch de aviso no WhatsApp, sem sessao.
             "/api/ordens-servico/data",
             "/api/ordemservico/data",
+            // OS abertas de amanha (com celular do cliente) para o batch de aviso, sem sessao.
+            "/api/ordens-servico/comunicar",
+            "/api/ordemservico/comunicar",
             // Paginas de agendamento do front consultam a OS sem token.
             "/api/confirmacao/*",
             "/api/cancelamento/*",

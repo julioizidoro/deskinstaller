@@ -21,6 +21,20 @@ public class OsNotificacaoProperties {
      */
     private String frontendUrl = "http://localhost:4200";
 
+    /**
+     * Base publica da API usada nos links enviados por WhatsApp
+     * ({@code {apiUrl}/api/ordens-servico/{id}/confirmar} e {@code .../cancelar}).
+     */
+    private String apiUrl = "http://localhost:8080";
+
+    public String linkApiConfirmar(Integer idOrdemServico) {
+        return semBarraFinal(apiUrl) + "/api/ordens-servico/" + idOrdemServico + "/confirmar";
+    }
+
+    public String linkApiCancelar(Integer idOrdemServico) {
+        return semBarraFinal(apiUrl) + "/api/ordens-servico/" + idOrdemServico + "/cancelar";
+    }
+
     public String linkConfirmacao(Integer idOrdemServico) {
         return base() + "/confirmacao/" + idOrdemServico;
     }
@@ -30,7 +44,11 @@ public class OsNotificacaoProperties {
     }
 
     private String base() {
-        String base = frontendUrl == null ? "" : frontendUrl.trim();
+        return semBarraFinal(frontendUrl);
+    }
+
+    private static String semBarraFinal(String url) {
+        String base = url == null ? "" : url.trim();
         while (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
         }

@@ -87,5 +87,10 @@ public class Ordemservico implements Serializable {
     @Column(name = "statuscliente", length = 15)
     private String statuscliente;
 
+    // Quando o aviso de agendamento foi enviado por WhatsApp (controle de duplicidade).
+    @Column(name = "dataAvisoWhatsapp")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataAvisoWhatsapp;
+
 
 }

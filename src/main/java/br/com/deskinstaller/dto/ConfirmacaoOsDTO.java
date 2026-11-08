@@ -26,6 +26,8 @@ public class ConfirmacaoOsDTO implements Serializable {
     private Integer numeroos;
     private Integer idordemServico;
     private String clienteNome;
+    /** Celular do cliente; preenchido apenas em /comunicar (não vai nas rotas públicas). */
+    private String foneCelular;
     private Date dataServico;
     private String horaServico;
     private String situacao;

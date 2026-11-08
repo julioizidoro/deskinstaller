@@ -2,9 +2,11 @@ package br.com.deskinstaller.repository;
 
 import br.com.deskinstaller.model.Ordemservico;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -74,6 +76,33 @@ public interface OrdemServicoRepository extends JpaRepository<Ordemservico, Inte
     List<Ordemservico> findByDataServicoBetweenFetchClienteAndEndereco(
             @Param("inicio") Date inicio,
             @Param("fim") Date fim);
+
+    // Ordens de uma data em determinada situação (ex.: "Aberta"), usadas para comunicar o cliente
+    @Query("select distinct o from Ordemservico o "
+            + "left join fetch o.cliente left join fetch o.endereco "
+            + "where o.dataServico between :inicio and :fim "
+            + "and lower(o.situacao) = lower(:situacao) "
+            + "order by o.horaServico asc")
+    List<Ordemservico> findByDataServicoBetweenAndSituacaoFetchClienteAndEndereco(
+            @Param("inicio") Date inicio,
+            @Param("fim") Date fim,
+            @Param("situacao") String situacao);
+
+    // Reserva o aviso da OS de forma atomica: retorna 1 se ainda nao foi avisada hoje, 0 se ja foi.
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query("update Ordemservico o set o.dataAvisoWhatsapp = :agora "
+            + "where o.idordemServico = :id "
+            + "and (o.dataAvisoWhatsapp is null or o.dataAvisoWhatsapp < :inicioHoje)")
+    int reservarAvisoWhatsapp(@Param("id") Integer id,
+                              @Param("agora") Date agora,
+                              @Param("inicioHoje") Date inicioHoje);
+
+    // Desfaz a reserva quando o envio falha, permitindo nova tentativa.
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query("update Ordemservico o set o.dataAvisoWhatsapp = null where o.idordemServico = :id")
+    int liberarAvisoWhatsapp(@Param("id") Integer id);
 
     // Agenda do dia de um técnico específico (funcionário alocado na OS)
     @Query("select distinct o from Ordemservico o "
