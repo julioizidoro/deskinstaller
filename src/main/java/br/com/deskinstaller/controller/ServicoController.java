@@ -4,6 +4,7 @@ package br.com.deskinstaller.controller;
 import br.com.deskinstaller.dto.ServicoDTO;
 import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.service.ServicoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,5 +33,11 @@ public class ServicoController {
         return servicoService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Servico não encontrado com ID: " + id));
+    }
+
+    @PostMapping("/salvar")
+    public ResponseEntity<ServicoDTO> salvar(@Valid @RequestBody ServicoDTO dto) {
+        log.info("POST /api/servicos/salvar - {}", dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicoService.salvar(dto));
     }
 }

@@ -1,6 +1,7 @@
 package br.com.deskinstaller.service;
 
 import br.com.deskinstaller.dto.ServicoDTO;
+import br.com.deskinstaller.exception.ResourceNotFoundException;
 import br.com.deskinstaller.model.Servico;
 import br.com.deskinstaller.repository.ServicoRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,17 @@ public class ServicoService {
     @Transactional(readOnly = true)
     public Optional<ServicoDTO> buscarPorId(Integer id) {
         return servicoRepository.findById(id).map(this::converterParaDTO);
+    }
+
+    @Transactional
+    public ServicoDTO salvar(ServicoDTO dto) {
+        log.info("Salvando Servico: {}", dto.getDescricao());
+        if (dto.getIdservico() != null && !servicoRepository.existsById(dto.getIdservico())) {
+            throw new ResourceNotFoundException("Servico não encontrado com ID: " + dto.getIdservico());
+        }
+        Servico salvo = servicoRepository.save(converterParaEntidade(dto));
+        log.info("Servico salvo com sucesso. ID: {}", salvo.getIdservico());
+        return converterParaDTO(salvo);
     }
 
 
